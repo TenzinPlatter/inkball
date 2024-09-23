@@ -37,10 +37,6 @@ public class App extends PApplet {
 
     int currentLevel = 0;
 
-    public static Random random = new Random();
-	
-	// Feel free to add any additional methods or attributes you want. Please put classes in different files.
-
     public App() {
         this.configPath = "config.json";
     }
@@ -76,13 +72,11 @@ public class App extends PApplet {
 
         Level.setScoreAmounts(ballScoreIncrease, ballScoreDecrease);
 
-//        for (int i = 0; i < levelConfigs.size(); i++) {
-//            JSONObject levelConfig = levelConfigs.getJSONObject(i);
-//            levels.add(new Level(levelConfig));
-//        }
+        for (int i = 0; i < levelConfigs.size(); i++) {
+            JSONObject levelConfig = levelConfigs.getJSONObject(i);
+            levels.add(new Level(levelConfig));
+        }
 
-        JSONObject levelConfig = levelConfigs.getJSONObject(1);
-        levels.add(new Level(levelConfig));
     }
 
     void loadSprites() {
@@ -148,8 +142,7 @@ public class App extends PApplet {
      */
 	@Override
     public void draw() {
-//        levels.get(currentLevel).draw(this);
-        levels.get(0).draw(this);
+        levels.get(currentLevel).draw(this);
 
         //----------------------------------
         //display Board for current level:

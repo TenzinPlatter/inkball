@@ -20,30 +20,6 @@ public class Cell {
         this.sprite = App.getSprite(type);
     }
 
-    void giveBall(char c) {
-        String color;
-        switch (c) {
-            case '0':
-                color = "silver";
-                break;
-            case '1':
-                color = "orange";
-                break;
-            case '2':
-                color = "blue";
-                break;
-            case '3':
-                color = "green";
-                break;
-            case '4':
-                color = "gold";
-                break;
-            default:
-                throw new RuntimeException("Need to pass giveBall a no. 0-4, not: " + c);
-        }
-
-        this.ball = new Ball(color);
-    }
 
     void setHole() {
         this.isHole = true;
@@ -58,7 +34,7 @@ public class Cell {
             return new int[] {this.x, this.y};
         }
 
-        return new int[] {this.x * 32, (this.y * 32) + 64};
+        return new int[] {this.x * App.CELLSIZE, (this.y * App.CELLSIZE) + 64};
     }
 
     String getType() {
@@ -71,8 +47,8 @@ public class Cell {
         }
 
         int[] pos = this.getPos(false);
-        int width = (this.isHole()) ? 64 : 32;
-        int height = (this.isHole()) ? 64 : 32;
+        int width = (this.isHole()) ? App.CELLSIZE * 2 : App.CELLSIZE;
+        int height = (this.isHole()) ? App.CELLSIZE * 2 : App.CELLSIZE;
 
         window.image(this.sprite, pos[0], pos[1], width, height);
     }

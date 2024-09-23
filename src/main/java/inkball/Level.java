@@ -114,7 +114,7 @@ public class Level {
                 ) {
                     if (inBall) {
                         cells[x - 1][y] = new Cell("tile", x - 1, y);
-                        cells[x - 1][y].giveBall(c);
+                        giveBallInit(c, x, y);
 
                         cells[x][y] = new Cell("tile", x, y);
                         inBall = false;
@@ -138,6 +138,33 @@ public class Level {
         }
 
         try { layout.close(); } catch (IOException e) { throw new RuntimeException(); }
+    }
+
+    void giveBallInit(char c, int x, int y) {
+        String color;
+        switch (c) {
+            case '0':
+                color = "silver";
+                break;
+            case '1':
+                color = "orange";
+                break;
+            case '2':
+                color = "blue";
+                break;
+            case '3':
+                color = "green";
+                break;
+            case '4':
+                color = "gold";
+                break;
+            default:
+                throw new RuntimeException("Need to pass giveBallInit a no. 0-4, not: " + c);
+        }
+
+        Ball res = new Ball(color, true);
+        res.setInitPos(x, y);
+        (this.balls).add(res);
     }
 
     ArrayList<Ball> getBalls(JSONObject config) {
