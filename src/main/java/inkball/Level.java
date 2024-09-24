@@ -6,28 +6,31 @@ import processing.data.JSONObject;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Level {
-    static int GREY = 0;
-    static int ORANGE = 1;
-    static int BLUE = 2;
-    static int GREEN = 3;
-    static int YELLOW = 4;
+    private static int GREY = 0;
+    private static int ORANGE = 1;
+    private static int BLUE = 2;
+    private static int GREEN = 3;
+    private static int YELLOW = 4;
 
-    String layoutFilePath;
-    int timeLimit;
-    int spawnInterval;
-    double increaseModifier;
-    double decreaseModifier;
-    ArrayList<Ball> balls;
+    private String layoutFilePath;
+    private int timeLimit;
+    private int spawnInterval;
+    private long lastSpawnTime;
+    private double increaseModifier;
+    private double decreaseModifier;
+    private ArrayList<Ball> balls = new ArrayList<>();
+    private ArrayList<int[]> spawnerLocs = new ArrayList<>();
 
-    Cell[][] cells = new Cell[18][18];
+    private Cell[][] cells = new Cell[18][18];
 
-    double[] scoreIncrease = new double[5];
-    double[] scoreDecrease = new double[5];
+    private double[] scoreIncrease = new double[5];
+    private double[] scoreDecrease = new double[5];
 
-    static double[] generalScoreIncrease = new double[5];
-    static double[] generalScoreDecrease = new double[5];
+    private static double[] generalScoreIncrease = new double[5];
+    private static double[] generalScoreDecrease = new double[5];
 
     public Level(JSONObject config) {
         layoutFilePath = config.getString("layout");
@@ -36,9 +39,35 @@ public class Level {
         increaseModifier = config.getFloat("score_increase_from_hole_capture_modifier");
         decreaseModifier = config.getFloat("score_decrease_from_wrong_hole_modifier");
 
-        balls = getBalls(config);
-        adjustScoreAmounts();
         setCells();
+        setBalls(config);
+        adjustScoreAmounts();
+    }
+
+    /**
+     * Trys to spawn next ball, fails if timer has not passed or no next ball to be spawned
+     * @param time
+     * @return
+     */
+    void trySpawnNext(long time) {
+        float timePassedInSeconds = (time - lastSpawnTime) * 1000 * 60;
+
+        boolean timerPassed = timePassedInSeconds > spawnInterval;
+
+        if (!timerPassed) {
+            return;
+        }
+
+        for (Ball b : this.balls) {
+            if (!b.hasSpawned()) {
+                b.spawn();
+                lastSpawnTime = time;
+            }
+        }
+    }
+
+    boolean levelOver() {
+        return this.balls.isEmpty();
     }
 
     void printCells() {
@@ -55,6 +84,13 @@ public class Level {
         for (int y = 0; y < 18; y++) {
             for (int x = 0; x < 18; x++) {
                 cells[x][y].draw(window);
+            }
+        }
+
+        for (Ball b : balls) {
+            if (b.hasSpawned()) {
+                b.move();
+                b.draw(window);
             }
         }
     }
@@ -87,8 +123,6 @@ public class Level {
                     continue;
                 }
 
-                System.out.printf("Cell at (%d, %d) - %s\n", x, y, c);
-
                 if (c == ' ') {
                     cells[x][y] = new Cell("tile", x, y);
                 }
@@ -103,6 +137,7 @@ public class Level {
 
                 else if (c == 'S') {
                     cells[x][y] = new Cell("entrypoint", x, y);
+                    spawnerLocs.add(new int[] {x, y});
                 }
 
                 else if (c == 'H') {
@@ -144,7 +179,7 @@ public class Level {
         String color;
         switch (c) {
             case '0':
-                color = "silver";
+                color = "grey";
                 break;
             case '1':
                 color = "orange";
@@ -156,7 +191,7 @@ public class Level {
                 color = "green";
                 break;
             case '4':
-                color = "gold";
+                color = "yellow";
                 break;
             default:
                 throw new RuntimeException("Need to pass giveBallInit a no. 0-4, not: " + c);
@@ -164,19 +199,31 @@ public class Level {
 
         Ball res = new Ball(color, true);
         res.setInitPos(x, y);
+        res.spawn();
         (this.balls).add(res);
     }
 
-    ArrayList<Ball> getBalls(JSONObject config) {
-        ArrayList<Ball> res = new ArrayList<>();
+    void setBalls(JSONObject config) {
+        Random random = new Random();
         JSONArray ballColors = config.getJSONArray("balls");
 
         for (int i = 0; i < ballColors.size(); i++) {
-            res.add(new Ball(ballColors.getString(i)));
-        }
+            Ball newBall = new Ball(ballColors.getString(i));
+            int j = random.nextInt(spawnerLocs.size());
+            int[] initPos = spawnerLocs.get(j);
 
-        return res;
+            newBall.setInitPos(initPos[0], initPos[1]);
+
+            balls.add(newBall);
+        }
     }
+
+    void printBallColors() {
+        for (Ball b : balls) {
+            System.out.printf("Ball: %s\n", b.color);
+        }
+    }
+
 
     void adjustScoreAmounts() {
         for (int i = 0; i < generalScoreIncrease.length; i++) {

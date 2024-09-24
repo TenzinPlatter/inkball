@@ -35,7 +35,8 @@ public class App extends PApplet {
     static HashMap<String, PImage> sprites = new HashMap<>();
     ArrayList<Level> levels = new ArrayList<>();
 
-    int currentLevel = 0;
+    Level currentLevel;
+    int currentLevelIndex = 0;
 
     public App() {
         this.configPath = "config.json";
@@ -77,6 +78,8 @@ public class App extends PApplet {
             levels.add(new Level(levelConfig));
         }
 
+        currentLevel = levels.get(currentLevelIndex);
+        currentLevel.printBallColors();
     }
 
     void loadSprites() {
@@ -142,7 +145,14 @@ public class App extends PApplet {
      */
 	@Override
     public void draw() {
-        levels.get(currentLevel).draw(this);
+        if (currentLevel.levelOver()) {
+            currentLevelIndex++;
+            currentLevel = levels.get(currentLevelIndex);
+        }
+
+        currentLevel.trySpawnNext(System.currentTimeMillis());
+
+        currentLevel.draw(this);
 
         //----------------------------------
         //display Board for current level:

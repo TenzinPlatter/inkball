@@ -19,15 +19,15 @@ public class Ball {
     public Ball(String color, boolean isInit) {
         this.color = color;
         this.isInitBall = isInit;
-        init();
+        init(isInit);
     }
 
     void spawn() {
         this.hasSpawned = true;
     }
 
-    void capture() {
-        this.hasSpawned = false;
+    boolean hasSpawned() {
+        return this.hasSpawned;
     }
 
     public Ball(String color) {
@@ -47,7 +47,7 @@ public class Ball {
         this.y = y;
     }
 
-    private void init() {
+    private void init(boolean isInit) {
         initSprite();
         initVelocity();
     }
@@ -64,8 +64,8 @@ public class Ball {
 
     private void initSprite() {
         int code = -1;
-        switch (color) {
-            case "silver":
+        switch (this.color) {
+            case "grey":
                 code = 0;
                 break;
             case "orange":
@@ -77,7 +77,7 @@ public class Ball {
             case "green":
                 code = 3;
                 break;
-            case "gold":
+            case "yellow":
                 code = 4;
                 break;
         }
@@ -91,10 +91,10 @@ public class Ball {
     }
 
     void draw(PApplet window) {
-        int width = 32;
-        int height = 32;
+        float width = (float)(this.x - 32f/2);
+        float height = (float)(this.y + 32f/2);
 
         // cast from double to float
-        window.image(this.sprite, (float)(x - width/2), (float)(y + height/2));
+        window.image(this.sprite, width, height);
     }
 }
