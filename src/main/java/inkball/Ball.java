@@ -8,7 +8,6 @@ import java.util.Random;
 public class Ball {
     PImage sprite;
     String color;
-    private boolean isInitBall = false;
     private boolean hasSpawned = false;
     private double x = 0;
     private double y = 0;
@@ -18,8 +17,8 @@ public class Ball {
 
     public Ball(String color, boolean isInit) {
         this.color = color;
-        this.isInitBall = isInit;
-        init(isInit);
+        this.hasSpawned = true;
+        init();
     }
 
     void spawn() {
@@ -47,7 +46,7 @@ public class Ball {
         this.y = y;
     }
 
-    private void init(boolean isInit) {
+    private void init() {
         initSprite();
         initVelocity();
     }
@@ -80,6 +79,10 @@ public class Ball {
             case "yellow":
                 code = 4;
                 break;
+        }
+
+        if (code == -1) {
+            throw new RuntimeException("Invalid ball color: " + this.color);
         }
 
         this.sprite = App.getSprite("ball" + code);

@@ -79,7 +79,6 @@ public class App extends PApplet {
         }
 
         currentLevel = levels.get(currentLevelIndex);
-        currentLevel.printBallColors();
     }
 
     void loadSprites() {

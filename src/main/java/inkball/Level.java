@@ -50,7 +50,7 @@ public class Level {
      * @return
      */
     void trySpawnNext(long time) {
-        float timePassedInSeconds = (time - lastSpawnTime) * 1000 * 60;
+        float timePassedInSeconds = (time - lastSpawnTime) / 1000;
 
         boolean timerPassed = timePassedInSeconds > spawnInterval;
 
@@ -59,10 +59,13 @@ public class Level {
         }
 
         for (Ball b : this.balls) {
-            if (!b.hasSpawned()) {
-                b.spawn();
-                lastSpawnTime = time;
+            if (b.hasSpawned()) {
+                continue;
             }
+
+            b.spawn();
+            lastSpawnTime = time;
+            break;
         }
     }
 
@@ -88,10 +91,12 @@ public class Level {
         }
 
         for (Ball b : balls) {
-            if (b.hasSpawned()) {
-                b.move();
-                b.draw(window);
+            if (!b.hasSpawned()) {
+                continue;
             }
+
+            b.move();
+            b.draw(window);
         }
     }
 
