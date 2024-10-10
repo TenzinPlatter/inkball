@@ -9,16 +9,21 @@ public class Ball {
     PImage sprite;
     String color;
     private boolean hasSpawned = false;
-    private double x = 0;
-    private double y = 0;
-    private double dx = 0;
-    private double dy = 0;
+    private Vec2 pos = new Vec2(0, 0);
+    double dx = 0;
+    double dy = 0;
+    // set as a float for division in draw section
+    static final float radius = 16;
     static Random random = new Random();
 
     public Ball(String color, boolean isInit) {
         this.color = color;
         this.hasSpawned = true;
         init();
+    }
+
+    Vec2 getPosVec() {
+        return this.pos;
     }
 
     void spawn() {
@@ -42,8 +47,8 @@ public class Ball {
     void setInitPos(int x, int y) {
         x *= App.CELLSIZE;
         y = y  * App.CELLSIZE + App.TOPBAR;
-        this.x = x;
-        this.y = y;
+        this.pos.x = x;
+        this.pos.y = y;
     }
 
     private void init() {
@@ -89,15 +94,15 @@ public class Ball {
     }
 
     void move() {
-        x += dx;
-        y += dy;
+        this.pos.x += dx;
+        this.pos.y += dy;
     }
 
     void draw(PApplet window) {
-        float width = (float)(this.x - 32f/2);
-        float height = (float)(this.y + 32f/2);
+        float xPos = (float)(this.pos.x - Ball.radius);
+        float yPos = (float)(this.pos.y + Ball.radius);
 
         // cast from double to float
-        window.image(this.sprite, width, height);
+        window.image(this.sprite, xPos, yPos);
     }
 }

@@ -28,7 +28,7 @@ public class App extends PApplet {
 
     public static final int INITIAL_PARACHUTES = 1;
 
-    public static final int FPS = 30;
+    public static final int FPS = 60;
 
     public String configPath;
     JSONObject config;

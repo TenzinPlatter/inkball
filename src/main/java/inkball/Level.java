@@ -95,6 +95,17 @@ public class Level {
                 continue;
             }
 
+            boolean collided = false;
+            for (int y = 0; y < 18; y++) {
+                for (int x = 0; x < 18; x++) {
+                    if (cells[x][y].handleCollision(b)) {
+                        collided = true;
+                        break;
+                    }
+                }
+                if (collided) { break; }
+            }
+
             b.move();
             b.draw(window);
         }

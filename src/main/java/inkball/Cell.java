@@ -20,6 +20,67 @@ public class Cell {
         this.sprite = App.getSprite(type);
     }
 
+    /**
+     * Clamps the value b between values a and c
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    float clamp(float a, float b, float c) {
+        if (b < a) { return a; }
+        if (b > c) { return c; }
+        return b;
+    }
+
+    /**
+     * Handles collision for a given ball on this cell, should be called before move
+     * @param ball Ball to check
+     * @return Returns true if collision has happened, false otherwise
+     */
+    boolean handleCollision(Ball ball) {
+        if (!this.isWall()) {
+            return false;
+        }
+
+        Vec2 v = ball.getPosVec();
+        float size = App.CELLSIZE;
+        int[] coords = this.getPos(false);
+        int x = coords[0];
+        int y = coords[1];
+
+        float closestX = clamp(x, v.x, x + size);
+        float closestY = clamp(y - size, v.y, y);
+
+        if (v.distanceTo(closestX, closestY) > Ball.radius) {
+            return false;
+        }
+
+        if (
+                // check that there isn't squares next to this
+                !true
+                // regular check
+                 && v.x > x + size || v.x < x
+        ) {
+            ball.dx *= -1;
+        }
+
+        if (v.y > y || v.y < y + size) {
+            ball.dy *= -1;
+        }
+
+        return true;
+    }
+
+    boolean isWall() {
+        for (int i = 0; i < 5; i++) {
+            if (App.getSprite("wall" + i) == this.sprite) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     void setHole() {
         this.isHole = true;
