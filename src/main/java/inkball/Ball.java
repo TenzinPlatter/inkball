@@ -51,6 +51,26 @@ public class Ball {
         this.pos.y = y;
     }
 
+    /**
+     * Sets sprite for ball
+     * @param sprite Cannot be null
+     */
+    void setSprite(PImage sprite) {
+        if (sprite == null) {
+            throw new IllegalArgumentException("Cannot set sprite as null");
+        }
+        this.sprite = sprite;
+    }
+
+    /**
+     * Wrapper to convert string to PImage for other setSprite method
+     * @param spriteName Sprite name. **Not a path**
+     */
+    void setSprite(String spriteName) {
+        // will do error handling as well as set sprite
+        this.setSprite(App.getSprite(spriteName));
+    }
+
     private void init() {
         initSprite();
         initVelocity();

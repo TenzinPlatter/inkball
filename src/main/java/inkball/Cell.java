@@ -63,6 +63,11 @@ public class Cell {
             return false;
         }
 
+        int colorCode = this.getWallColor();
+        if (colorCode != -1) {
+            ball.setSprite("ball" + colorCode);
+        }
+
         if (
                 v.x > x + size && !neighbors[RIGHT]
                 || v.x < x && !neighbors[LEFT]
@@ -78,6 +83,24 @@ public class Cell {
         }
 
         return true;
+    }
+
+    /**
+     * Method to check the color of a wall
+     * @return returns integer code corresponding to color, -1 for no color/ not a wall
+     * 1 -> orange
+     * 2 -> blue
+     * 3 -> green
+     * 4 -> yellow
+     */
+    int getWallColor() {
+        for (int i = 1; i < 5; i++) {
+            if (App.getSprite("wall" + i) == this.sprite) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     boolean isWall() {
