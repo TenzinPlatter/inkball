@@ -7,19 +7,21 @@ import java.util.Random;
 
 public class Ball {
     PImage sprite;
-    String color;
+    int color;
     private boolean hasSpawned = false;
     private Vec2 pos = new Vec2(0, 0);
-    double dx = 0;
-    double dy = 0;
+    float dx = 0;
+    float dy = 0;
+    float spriteScaleFactor = 1f;
     // set as a float for division in draw section
     static final float radius = 16;
     static Random random = new Random();
 
-    public Ball(String color, boolean isInit) {
+    public Ball(int color, boolean isInit) {
         this.color = color;
         this.hasSpawned = true;
-        init();
+        setSprite("ball" + this.color);
+        initVelocity();
     }
 
     Vec2 getPosVec() {
@@ -34,9 +36,10 @@ public class Ball {
         return this.hasSpawned;
     }
 
-    public Ball(String color) {
+    public Ball(int color) {
         this.color = color;
-        init();
+        setSprite("ball" + this.color);
+        initVelocity();
     }
 
     /**
@@ -71,11 +74,6 @@ public class Ball {
         this.setSprite(App.getSprite(spriteName));
     }
 
-    private void init() {
-        initSprite();
-        initVelocity();
-    }
-
     private void initVelocity() {
         // returns 0 - 1
         int xDir = random.nextInt(2);
@@ -84,33 +82,6 @@ public class Ball {
         // gives either 2 or -2
         dx = 2 - (4 * xDir);
         dy = 2 - (4 * yDir);
-    }
-
-    private void initSprite() {
-        int code = -1;
-        switch (this.color) {
-            case "grey":
-                code = 0;
-                break;
-            case "orange":
-                code = 1;
-                break;
-            case "blue":
-                code = 2;
-                break;
-            case "green":
-                code = 3;
-                break;
-            case "yellow":
-                code = 4;
-                break;
-        }
-
-        if (code == -1) {
-            throw new RuntimeException("Invalid ball color: " + this.color);
-        }
-
-        this.sprite = App.getSprite("ball" + code);
     }
 
     void move() {
@@ -122,7 +93,10 @@ public class Ball {
         float xPos = (float)(this.pos.x - Ball.radius);
         float yPos = (float)(this.pos.y + Ball.radius);
 
-        // cast from double to float
-        window.image(this.sprite, xPos, yPos);
+        // same size for both width and height
+        float size = Ball.radius * this.spriteScaleFactor * 2;
+
+        // needs casting from double to float
+        window.image(this.sprite, xPos, yPos, size, size);
     }
 }

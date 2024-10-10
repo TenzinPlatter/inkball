@@ -38,6 +38,8 @@ public class App extends PApplet {
     Level currentLevel;
     int currentLevelIndex = 0;
 
+    static private double score = 0;
+
     public App() {
         this.configPath = "config.json";
     }
@@ -103,6 +105,27 @@ public class App extends PApplet {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static int getColorCode(String color) {
+        switch (color) {
+            case "grey":
+                return 0;
+            case "orange":
+                return 1;
+            case "blue":
+                return 2;
+            case "green":
+                return 3;
+            case "yellow":
+                return 4;
+            default:
+                throw new RuntimeException("Unknown color: " + color);
+        }
+    }
+
+    static void addScore(double amount) {
+        App.score += amount;
     }
 
     /**

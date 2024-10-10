@@ -28,9 +28,7 @@ public class Cell {
      * @return
      */
     float clamp(float a, float b, float c) {
-        if (b < a) { return a; }
-        if (b > c) { return c; }
-        return b;
+        return Math.max(a, Math.min(b, c));
     }
 
     /**
@@ -59,11 +57,11 @@ public class Cell {
         float closestX = clamp(x, v.x, x + size);
         float closestY = clamp(y - size, v.y, y);
 
-        if (v.distanceTo(closestX, closestY) > Ball.radius) {
+        if (v.distanceTo(closestX, closestY) > Ball.radius * ball.spriteScaleFactor) {
             return false;
         }
 
-        int colorCode = this.getWallColor();
+        int colorCode = this.getColorFor("wall");
         if (colorCode != -1) {
             ball.setSprite("ball" + colorCode);
         }
@@ -86,16 +84,17 @@ public class Cell {
     }
 
     /**
-     * Method to check the color of a wall
+     * Method to check the color of a given type of sprite
+     * @param type Either hole or wall
      * @return returns integer code corresponding to color, -1 for no color/ not a wall
      * 1 -> orange
      * 2 -> blue
      * 3 -> green
      * 4 -> yellow
      */
-    int getWallColor() {
+    int getColorFor(String type) {
         for (int i = 1; i < 5; i++) {
-            if (App.getSprite("wall" + i) == this.sprite) {
+            if (App.getSprite(type + i) == this.sprite) {
                 return i;
             }
         }

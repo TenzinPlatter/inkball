@@ -23,6 +23,7 @@ public class Level {
     private double decreaseModifier;
     private ArrayList<Ball> balls = new ArrayList<>();
     private ArrayList<int[]> spawnerLocs = new ArrayList<>();
+    private ArrayList<Vec2> holeLocs = new ArrayList<>();
 
     private Cell[][] cells = new Cell[18][18];
 
@@ -88,6 +89,10 @@ public class Level {
         drawBalls(window);
     }
 
+    /**
+     * method to draw balls and handle all movement/sprite editing
+     * @param window Window to draw onto
+     */
     void drawBalls(PApplet window) {
         for (Ball b : balls) {
             if (!b.hasSpawned()) {
@@ -96,14 +101,21 @@ public class Level {
 
             boolean collided = false;
 
+            // handles collision with walls
             for (int y = 0; y < 18; y++) {
                 for (int x = 0; x < 18; x++) {
-                    if (cells[x][y].handleCollision(b, this.getNeighborsArr(x, y))) {
-                        collided = true;
-                        break;
+                    if (!collided) {
+                        // sets to true if there was a collision, false otherwise
+                        collided = cells[x][y].handleCollision(b, this.getNeighborsArr(x, y));
                     }
                 }
-                if (collided) { break; }
+            }
+
+            // distance to center of closest hole
+            Vec2 hole = this.handleHole(b);
+
+            if (hole != null) {
+                this.handleCapture(b, cells[(int)hole.x][(int)hole.y]);
             }
 
             b.move();
@@ -111,11 +123,69 @@ public class Level {
         }
     }
 
+    void handleCapture(Ball ball, Cell hole) {
+        if (ball.color == 0 || hole.getColorFor("hole") == 0) {
+            this.balls.remove(ball);
+            App.addScore(this.scoreIncrease[ball.color]);
+        }
+
+        else if (ball.color == hole.getColorFor("hole")) {
+            this.balls.remove(ball);
+            App.addScore(this.scoreIncrease[ball.color]);
+        }
+
+        else {
+            // move ball to back of queue as a copy
+            this.balls.remove(ball);
+            this.balls.add(new Ball(ball.color));
+        }
+    }
+
+    /**
+     * Finds closest hole to ball passed in and handles sprite shrinking for it
+     * @param b Ball to be checked
+     * @return Returns either the location of the hole that captured the ball, or null
+     */
+    Vec2 handleHole(Ball b) {
+        float closestDistance = Float.MAX_VALUE;
+        Vec2 closestHole = this.holeLocs.get(0);
+
+        for (Vec2 loc : this.holeLocs) {
+            Vec2 v = loc.centerCoords(64);
+            float dist = (float) b.getPosVec().distanceTo(v);
+
+            if (dist < closestDistance) {
+                closestDistance = dist;
+                closestHole = loc;
+            }
+        }
+
+        if (closestDistance > 32) {
+            b.spriteScaleFactor = 1;
+            return null;
+        }
+
+        // ball will be captured when center is within 5px of holes center
+
+        if (closestDistance <= 5) {
+            // sprite scaling shouldn't matter as ball should be removed before it has a chance
+            // to be drawn
+            return closestHole;
+        }
+
+        Vec2 velUpdate = b.getPosVec().projectionOnto(closestHole);
+        b.dx += (float) (velUpdate.x * 0.005);
+        b.dy += (float) (velUpdate.y * 0.005);
+
+        b.spriteScaleFactor = 32 / closestDistance;
+        return null;
+    }
+
     /**
      * Method for getting boolean neighbors array used in handling ball collision
      * @param x
      * @param y
-     * @return returns array of booleans encoding wether neighboring cell is a wall
+     * @return returns array of booleans encoding whether neighboring cell is a wall
      * in order -> Above, Below, Left, Right
      */
     boolean[] getNeighborsArr(int x, int y) {
@@ -213,15 +283,14 @@ public class Level {
                     inHole = true;
                 }
 
-                else if (
-                        (c == '0' || c == '1' || c == '2' || c == '3' || c == '4')
-                ) {
+                else if (c == '0' || c == '1' || c == '2' || c == '3' || c == '4') {
                     if (inBall) {
                         cells[x - 1][y] = new Cell("tile", x - 1, y);
                         giveBallInit(c, x, y);
 
                         cells[x][y] = new Cell("tile", x, y);
                         inBall = false;
+
                     } else if (inHole) {
                         cells[x - 1][y] = new Cell("hole" + c, x - 1, y);
                         cells[x][y] = new Cell("none", x, y);
@@ -229,8 +298,10 @@ public class Level {
                         cells[x][y + 1] = new Cell("none", x, y + 1);
 
                         cells[x - 1][y].setHole();
+                        this.holeLocs.add(new Vec2(x - 1, y));
 
                         inHole = false;
+
                     } else {
                         cells[x][y] = new Cell("wall" + c, x, y);
                     }
@@ -244,26 +315,10 @@ public class Level {
         try { layout.close(); } catch (IOException e) { throw new RuntimeException(); }
     }
 
-    void giveBallInit(char c, int x, int y) {
-        String color;
-        switch (c) {
-            case '0':
-                color = "grey";
-                break;
-            case '1':
-                color = "orange";
-                break;
-            case '2':
-                color = "blue";
-                break;
-            case '3':
-                color = "green";
-                break;
-            case '4':
-                color = "yellow";
-                break;
-            default:
-                throw new RuntimeException("Need to pass giveBallInit a no. 0-4, not: " + c);
+    void giveBallInit(char colorCode, int x, int y) {
+        int color = (int) (colorCode - '0');
+        if (color < 0 || color > 4) {
+            throw new IllegalArgumentException("Illegal color code: " + color);
         }
 
         Ball res = new Ball(color, true);
@@ -277,7 +332,9 @@ public class Level {
         JSONArray ballColors = config.getJSONArray("balls");
 
         for (int i = 0; i < ballColors.size(); i++) {
-            Ball newBall = new Ball(ballColors.getString(i));
+            Ball newBall = new Ball(
+                    App.getColorCode(ballColors.getString(i))
+            );
             int j = random.nextInt(spawnerLocs.size());
             int[] initPos = spawnerLocs.get(j);
 
