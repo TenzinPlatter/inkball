@@ -36,9 +36,16 @@ public class Cell {
     /**
      * Handles collision for a given ball on this cell, should be called before move
      * @param ball Ball to check
+     * @param neighbors Array of bools, stating wether or not the cell has surrounding cells,
+     *                  in the order -> Above, Below, Left, Right
      * @return Returns true if collision has happened, false otherwise
      */
-    boolean handleCollision(Ball ball) {
+    boolean handleCollision(Ball ball, boolean[] neighbors) {
+        int ABOVE = 0;
+        int BELOW = 1;
+        int LEFT = 2;
+        int RIGHT = 3;
+
         if (!this.isWall()) {
             return false;
         }
@@ -57,15 +64,16 @@ public class Cell {
         }
 
         if (
-                // check that there isn't squares next to this
-                !true
-                // regular check
-                 && v.x > x + size || v.x < x
+                v.x > x + size && !neighbors[RIGHT]
+                || v.x < x && !neighbors[LEFT]
         ) {
             ball.dx *= -1;
         }
 
-        if (v.y > y || v.y < y + size) {
+        if (
+                v.y > y && !neighbors[BELOW]
+                || v.y < y + size && !neighbors[ABOVE]
+        ) {
             ball.dy *= -1;
         }
 

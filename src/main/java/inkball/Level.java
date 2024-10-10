@@ -84,21 +84,21 @@ public class Level {
     }
 
     void draw(PApplet window) {
-        for (int y = 0; y < 18; y++) {
-            for (int x = 0; x < 18; x++) {
-                cells[x][y].draw(window);
-            }
-        }
+        drawCells(window);
+        drawBalls(window);
+    }
 
+    void drawBalls(PApplet window) {
         for (Ball b : balls) {
             if (!b.hasSpawned()) {
                 continue;
             }
 
             boolean collided = false;
+
             for (int y = 0; y < 18; y++) {
                 for (int x = 0; x < 18; x++) {
-                    if (cells[x][y].handleCollision(b)) {
+                    if (cells[x][y].handleCollision(b, this.getNeighborsArr(x, y))) {
                         collided = true;
                         break;
                     }
@@ -108,6 +108,59 @@ public class Level {
 
             b.move();
             b.draw(window);
+        }
+    }
+
+    /**
+     * Method for getting boolean neighbors array used in handling ball collision
+     * @param x
+     * @param y
+     * @return returns array of booleans encoding wether neighboring cell is a wall
+     * in order -> Above, Below, Left, Right
+     */
+    boolean[] getNeighborsArr(int x, int y) {
+        if (x < 0 || x >= 18 || y < 0 || y >= 18) {
+            throw new IllegalArgumentException("Illegal x or y coordinate: " + x + ", " + y);
+        }
+
+        boolean[] neighbors = new boolean[4];
+        int ABOVE = 0;
+        int BELOW = 1;
+        int LEFT = 2;
+        int RIGHT = 3;
+
+        try {
+            neighbors[ABOVE] = cells[x][y - 1].isWall();
+        } catch (Exception e) {
+            neighbors[ABOVE] = false;
+        }
+
+        try {
+            neighbors[BELOW] = cells[x][y + 1].isWall();
+        } catch (Exception e) {
+            neighbors[BELOW] = false;
+        }
+
+        try {
+            neighbors[LEFT] = cells[x - 1][y].isWall();
+        } catch (Exception e) {
+            neighbors[LEFT] = false;
+        }
+
+        try {
+            neighbors[RIGHT] = cells[x + 1][y].isWall();
+        } catch (Exception e) {
+            neighbors[RIGHT] = false;
+        }
+
+        return neighbors;
+    }
+
+    void drawCells(PApplet window) {
+        for (int y = 0; y < 18; y++) {
+            for (int x = 0; x < 18; x++) {
+                cells[x][y].draw(window);
+            }
         }
     }
 
