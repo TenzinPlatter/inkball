@@ -138,6 +138,7 @@ public class Level {
             // move ball to back of queue as a copy
             this.balls.remove(ball);
             this.balls.add(new Ball(ball.color));
+            App.addScore(-1 * this.scoreDecrease[ball.color]);
         }
     }
 
