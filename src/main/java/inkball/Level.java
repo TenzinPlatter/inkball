@@ -21,9 +21,11 @@ public class Level {
     private long lastSpawnTime;
     private double increaseModifier;
     private double decreaseModifier;
+
     private ArrayList<Ball> balls = new ArrayList<>();
     private ArrayList<int[]> spawnerLocs = new ArrayList<>();
     private ArrayList<Vec2> holeLocs = new ArrayList<>();
+    private ArrayList<Line> lines = new ArrayList<>();
 
     private Cell[][] cells = new Cell[18][18];
 
@@ -86,7 +88,25 @@ public class Level {
 
     void draw(PApplet window) {
         drawCells(window);
+        drawLines(window);
         drawBalls(window);
+    }
+
+    void drawLines(PApplet window) {
+        //TODO: handle collision
+        for (Ball ball : this.balls) {
+            this.handleLinesCollision(ball);
+        }
+
+        for (Line line : this.lines) {
+            line.draw(window);
+        }
+    }
+
+    void handleLinesCollision(Ball ball) {
+        for (Line line : this.lines) {
+            line.handleCollision(ball);
+        }
     }
 
     /**

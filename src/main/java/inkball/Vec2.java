@@ -43,8 +43,29 @@ public class Vec2 {
         );
     }
 
+    double magnitude() {
+        return this.distanceTo(0, 0);
+    }
+
+    Vec2 add(Vec2 v) {
+        return new Vec2(this.x + v.x, this.y + v.y);
+    }
+
+    Vec2 getUnitVec() {
+        float magnitude = (float) this.magnitude();
+
+        float x = this.x / magnitude;
+        float y = this.y / magnitude;
+
+        return new Vec2(x, y);
+    }
+
+    float dot(Vec2 v) {
+        return (this.x * v.x) + (this.y * v.y);
+    }
+
     Vec2 projectionOnto(Vec2 v) {
-        float dotUV = (this.x * v.x) + (this.y * v.y);
+        float dotUV = this.dot(v);
         float magV = (float) Math.sqrt((v.x * v.x) + (v.y * v.y));
         float k = dotUV / magV;
 

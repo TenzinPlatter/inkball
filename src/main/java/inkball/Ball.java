@@ -42,6 +42,15 @@ public class Ball {
         initVelocity();
     }
 
+    void setVel(Vec2 newVel) {
+        this.dx = newVel.x;
+        this.dy = newVel.y;
+    }
+
+    Vec2 getVelVec() {
+        return new Vec2(this.dx, this.dy);
+    }
+
     /**
      * Params should be passed as coords
      * @param x
