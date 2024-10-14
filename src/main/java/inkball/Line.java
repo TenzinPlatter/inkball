@@ -66,17 +66,22 @@ public class Line {
 
         float k = 2 * ballV.dot(closest);
 
+        // formula from specifications
         Vec2 newVel = new Vec2(
                 ballV.x - (k * closest.x),
                 ballV.y - (k * closest.y)
         );
 
-        ball.setVel()
+        ball.setVel(newVel);
 
         return true;
     }
 
     void draw(PApplet window) {
+        if (points.size() == 1) {
+            return;
+        }
+
         Vec2 last = null;
         for (Vec2 point : points) {
             // round end of lines and turns

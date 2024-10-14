@@ -36,6 +36,11 @@ public class Vec2 {
         );
     }
 
+    /**
+     * Finds the distance between this (as a point) and another point
+     * @param v Second point
+     * @return Distance
+     */
     double distanceTo(Vec2 v) {
         return Math.sqrt(
                 Math.pow((v.x - this.x), 2)
@@ -43,14 +48,27 @@ public class Vec2 {
         );
     }
 
+    /**
+     * Takes the distance between this vector (as a point) and the origin
+     * @return Returns the magnitude (distance to origin)
+     */
     double magnitude() {
         return this.distanceTo(0, 0);
     }
 
+    /**
+     * Adds two vectors together
+     * @param v The vector to be added
+     * @return Result of the addition
+     */
     Vec2 add(Vec2 v) {
         return new Vec2(this.x + v.x, this.y + v.y);
     }
 
+    /**
+     * Finds the unit vector for this vector
+     * @return The unit vector
+     */
     Vec2 getUnitVec() {
         float magnitude = (float) this.magnitude();
 
@@ -60,10 +78,20 @@ public class Vec2 {
         return new Vec2(x, y);
     }
 
+    /**
+     * Finds the dot product between this vector and another
+     * @param v The second vector to be used in the dot product
+     * @return The value of the dot product
+     */
     float dot(Vec2 v) {
         return (this.x * v.x) + (this.y * v.y);
     }
 
+    /**
+     * Finds the vector projection of this onto another vector
+     * @param v Vector to be projected onto
+     * @return Vector projection
+     */
     Vec2 projectionOnto(Vec2 v) {
         float dotUV = this.dot(v);
         float magV = (float) Math.sqrt((v.x * v.x) + (v.y * v.y));
@@ -72,6 +100,12 @@ public class Vec2 {
         return new Vec2(k * v.x, k * v.y);
     }
 
+    /**
+     * Finds the distance between this (as a point) and another point
+     * @param x X coordinate of second point
+     * @param y Y coordinate of second point
+     * @return Distance value
+     */
     double distanceTo(float x, float y) {
         return Math.sqrt(
                 Math.pow((x - this.x), 2)

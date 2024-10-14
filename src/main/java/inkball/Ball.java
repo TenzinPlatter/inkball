@@ -24,6 +24,10 @@ public class Ball {
         initVelocity();
     }
 
+    /**
+     * Get the center of the ball
+     * @return A Vec2 with centered coordinates for the ball
+     */
     Vec2 getPosVec() {
         return this.pos;
     }
@@ -52,15 +56,14 @@ public class Ball {
     }
 
     /**
-     * Params should be passed as coords
-     * @param x
-     * @param y
+     * Set a balls spawn position
+     * @param x X coordinate
+     * @param y Y coordinate
      */
     void setInitPos(int x, int y) {
         x *= App.CELLSIZE;
         y = y  * App.CELLSIZE + App.TOPBAR;
-        this.pos.x = x;
-        this.pos.y = y;
+        this.pos = new Vec2(x, y);
     }
 
     /**
@@ -99,10 +102,12 @@ public class Ball {
     }
 
     void draw(PApplet window) {
+        // take center pos to corner
         float xPos = (float)(this.pos.x - Ball.radius);
         float yPos = (float)(this.pos.y + Ball.radius);
 
         // same size for both width and height
+        // radius times scale factor * 2 = visual diameter
         float size = Ball.radius * this.spriteScaleFactor * 2;
 
         // needs casting from double to float

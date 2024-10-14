@@ -67,15 +67,15 @@ public class Cell {
         }
 
         if (
-                v.x > x + size && !neighbors[RIGHT]
-                || v.x < x && !neighbors[LEFT]
+                (v.x > x + size && !neighbors[RIGHT])
+                || (v.x < x && !neighbors[LEFT])
         ) {
             ball.dx *= -1;
         }
 
         if (
-                v.y > y && !neighbors[BELOW]
-                || v.y < y + size && !neighbors[ABOVE]
+                (v.y < y && !neighbors[ABOVE])
+                || (v.y > y + size && !neighbors[BELOW])
         ) {
             ball.dy *= -1;
         }

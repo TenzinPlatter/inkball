@@ -45,6 +45,11 @@ public class Level {
         setCells();
         setBalls(config);
         adjustScoreAmounts();
+
+        Line l = new Line(new Vec2(100, 100));
+        l.addPoint(new Vec2(200, 200));
+        l.addPoint(new Vec2(400, 200));
+        this.lines.add(l);
     }
 
     /**
@@ -93,7 +98,6 @@ public class Level {
     }
 
     void drawLines(PApplet window) {
-        //TODO: handle collision
         for (Ball ball : this.balls) {
             this.handleLinesCollision(ball);
         }
