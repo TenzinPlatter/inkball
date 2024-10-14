@@ -87,7 +87,7 @@ public class Cell {
     /**
      * Method to check the color of a given type of sprite
      * @param type Either hole or wall
-     * @return returns integer code corresponding to color, -1 for no color/ not a wall
+     * @return returns integer code corresponding to color, -1 for no color/grey
      * 1 -> orange
      * 2 -> blue
      * 3 -> green

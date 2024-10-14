@@ -23,33 +23,18 @@ public class Line {
     boolean handleCollision(Ball ball) {
         Vec2 a = null;
         Vec2 b = null;
-        Vec2 ballP = ball.getPosVec();
-        // 32 offset here stops ball from bouncing before/ after line
-        ballP = new Vec2(ballP.x, ballP.y + 32);
         Vec2 ballV = ball.getVelVec();
+        Vec2 ballPTemp = ball.getPosVec();
+        Vec2 ballP = new Vec2(ballPTemp.x, ballPTemp.y);
 
-        for (int i = 0; i < points.size() - 1; i++) {
-            Vec2 u = points.get(i);
-            Vec2 v = points.get(i + 1);
+        Vec2[] res = checkForCollision(ballP, (int) Ball.radius);
 
-
-            // colliding with wall section
-            // 32 offset here makes ball bounce off close side off wall rather than travelling
-            // through and bouncing off far edge
-            if (
-                    u.distanceTo(ballP) + v.distanceTo(ballP)
-                    < u.distanceTo(v) + (Ball.radius * ball.spriteScaleFactor) + 32
-            ) {
-                a = u;
-                b = v;
-                break;
-            }
-        }
-
-        // return out if colliding section was not found
-        if (a == null) {
+        if (res == null) {
             return false;
         }
+
+        a = res[0];
+        b = res[1];
 
         float dx = b.x - a.x;
         float dy = b.y - a.y;
@@ -78,6 +63,33 @@ public class Line {
         ball.setVel(newVel);
 
         return true;
+    }
+
+    /**
+     * Checks for collision between the line and a circle
+     * @param point Position of the circle
+     * @param radius Radius of the circle
+     * @return True if collision, else false
+     */
+    Vec2[] checkForCollision(Vec2 point, int radius) {
+        // Without this offset collision will be triggered well before/after visually hitting line
+        Vec2 actualPoint = new Vec2(point.x, point.y + radius * 2);
+        for (int i = 0; i < points.size() - 1; i++) {
+            Vec2 u = points.get(i);
+            Vec2 v = points.get(i + 1);
+
+            // radius * 3 stops ball from going through line until it reaches the far edge, and
+            // it will collide with the close side
+            if (
+                    u.distanceTo(actualPoint) + v.distanceTo(actualPoint)
+                    < u.distanceTo(v) + radius * 3
+            ) {
+                // collided with wall section
+                return new Vec2[] {u, v};
+            }
+        }
+
+        return null;
     }
 
     /**

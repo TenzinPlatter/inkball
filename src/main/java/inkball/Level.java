@@ -6,7 +6,9 @@ import processing.data.JSONObject;
 
 import java.beans.beancontext.BeanContext;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 public class Level {
@@ -83,7 +85,12 @@ public class Level {
      * @param y
      */
     void removeCurrentLinePoint(int x, int y) {
-        //TODO
+        for (Line line : lines) {
+            if (line.checkForCollision(new Vec2(x, y), 5) != null) {
+                lines.remove(line);
+                return;
+            }
+        }
     }
 
     /**
@@ -160,7 +167,9 @@ public class Level {
      * @param window Window to draw onto
      */
     void drawBalls(PApplet window) {
-        for (Ball b : balls) {
+        for (Iterator<Ball> it = balls.iterator(); it.hasNext(); ) {
+            Ball b = it.next();
+
             if (!b.hasSpawned()) {
                 continue;
             }
@@ -175,7 +184,9 @@ public class Level {
                         collided = cells[x][y].handleCollision(b, this.getNeighborsArr(x, y));
                     }
                 }
-                if (collided) { break; }
+                if (collided) {
+                    break;
+                }
             }
 
             for (Ball ball : this.balls) {
@@ -196,7 +207,8 @@ public class Level {
             Vec2 hole = this.handleHole(b);
 
             if (hole != null) {
-                this.handleCapture(b, cells[(int)hole.x][(int)hole.y]);
+                this.handleCapture(b, cells[(int) hole.x][(int) hole.y]);
+                it.remove();
             }
 
             b.move();
@@ -206,18 +218,15 @@ public class Level {
 
     void handleCapture(Ball ball, Cell hole) {
         if (ball.color == 0 || hole.getColorFor("hole") == 0) {
-            this.balls.remove(ball);
             App.addScore(this.scoreIncrease[ball.color]);
         }
 
         else if (ball.color == hole.getColorFor("hole")) {
-            this.balls.remove(ball);
             App.addScore(this.scoreIncrease[ball.color]);
         }
 
         else {
             // move ball to back of queue as a copy
-            this.balls.remove(ball);
             this.balls.add(new Ball(ball.color));
             App.addScore(-1 * this.scoreDecrease[ball.color]);
         }
@@ -225,41 +234,48 @@ public class Level {
 
     /**
      * Finds closest hole to ball passed in and handles sprite shrinking for it
-     * @param b Ball to be checked
+     * @param ball Ball to be checked
      * @return Returns either the location of the hole that captured the ball, or null
      */
-    Vec2 handleHole(Ball b) {
-        float closestDistance = Float.MAX_VALUE;
-        Vec2 closestHole = this.holeLocs.get(0);
+    Vec2 handleHole(Ball ball) {
+        Vec2 ballPos = ball.getPosVec();
+        Vec2 closestHole = this.holeLocs.get(0).coordsToPos();
+        float closestDistance = (float) ballPos.distanceTo(closestHole);
+        boolean firstIter = true;
 
         for (Vec2 loc : this.holeLocs) {
-            Vec2 v = loc.centerCoords(64);
-            float dist = (float) b.getPosVec().distanceTo(v);
+            if (firstIter) {
+                firstIter = false;
+                continue;
+            }
+
+            Vec2 v = loc.coordsToPos().centerCoords(64);
+            float dist = (float) ballPos.distanceTo(v);
 
             if (dist < closestDistance) {
                 closestDistance = dist;
-                closestHole = loc;
+                closestHole = v;
             }
         }
 
         if (closestDistance > 32) {
-            b.spriteScaleFactor = 1;
+            ball.spriteScaleFactor = 1;
             return null;
         }
 
         // ball will be captured when center is within 5px of holes center
-
-        if (closestDistance <= 5) {
+        // offset is for lenience
+        if (closestDistance <= Ball.radius + 3) {
             // sprite scaling shouldn't matter as ball should be removed before it has a chance
             // to be drawn
-            return closestHole;
+            return closestHole.centerCoords(-64).posToCoords();
         }
 
-        Vec2 velUpdate = b.getPosVec().projectionOnto(closestHole);
-        b.dx += (float) (velUpdate.x * 0.005);
-        b.dy += (float) (velUpdate.y * 0.005);
+        Vec2 velUpdate = ballPos.to(closestHole);
+        ball.dx += (float) (velUpdate.x * 0.005);
+        ball.dy += (float) (velUpdate.y * 0.005);
 
-        b.spriteScaleFactor = 32 / closestDistance;
+        ball.spriteScaleFactor = closestDistance / 32;
         return null;
     }
 

@@ -10,6 +10,47 @@ public class Vec2 {
     }
 
     /**
+     * Converts this vecs position from coords to position, does not check for valid coords
+     * @return New vec
+     */
+    Vec2 coordsToPos() {
+        return new Vec2(
+                this.x * App.CELLSIZE,
+                this.y * App.CELLHEIGHT + App.TOPBAR
+        );
+    }
+
+    /**
+     * Converts this vecs position from position to coords, does not check for valid coords
+     * @return New vec
+     */
+    Vec2 posToCoords() {
+        return new Vec2(
+                (float) ((int) this.x / App.CELLSIZE),
+                (float) ((int) (this.y - App.TOPBAR) / App.CELLHEIGHT)
+        );
+    }
+
+    /**
+     * Prints the x and y coordinates of this vector
+     */
+    void print() {
+        System.out.printf("Vec: (%f %f)\n", this.x, this.y);
+    }
+
+    /**
+     * Finds the vector between this and another
+     * @param v Starting point
+     * @return
+     */
+    Vec2 to (Vec2 v) {
+        return new Vec2(
+                v.x - this.x,
+                v.y - this.y
+        );
+    }
+
+    /**
      * Centers the point of the vec, assuming a rectangle with width and height given, also assuming
      * vec originally points to top left
      * @param width

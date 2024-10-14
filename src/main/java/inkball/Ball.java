@@ -14,7 +14,7 @@ public class Ball {
     float dy = 0;
     float spriteScaleFactor = 1f;
     // set as a float for division in draw section
-    static final float radius = 16;
+    static final float radius = 12;
     static Random random = new Random();
 
     public Ball(int color, boolean isInit) {
@@ -26,6 +26,10 @@ public class Ball {
 
     Vec2 getPosVec() {
         return this.pos;
+    }
+
+    void kill() {
+        this.hasSpawned = false;
     }
 
     void spawn() {
@@ -103,7 +107,8 @@ public class Ball {
         int xDir = random.nextInt(1);
         int yDir = random.nextInt(1);
 
-        // gives either 2 or -2
+        // gives either 1 or -1
+        // (not 2 as using 60fps)
         dx = 1 - (2 * xDir);
         dy = 1 - (2 * yDir);
     }
@@ -114,6 +119,10 @@ public class Ball {
     }
 
     void draw(PApplet window) {
+        if (!this.hasSpawned) {
+            return;
+        }
+
         float xPos = (float)(this.pos.x - Ball.radius);
         float yPos = (float)(this.pos.y + Ball.radius);
 

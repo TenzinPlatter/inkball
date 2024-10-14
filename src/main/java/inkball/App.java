@@ -146,7 +146,9 @@ public class App extends PApplet {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        this.currentLevel.addLineMouse(mouseX, mouseY);
+        if (mouseButton == LEFT) {
+            this.currentLevel.addLineMouse(mouseX, mouseY);
+        }
     }
 	
 	@Override
