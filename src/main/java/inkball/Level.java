@@ -4,6 +4,7 @@ import processing.core.PApplet;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
+import java.beans.beancontext.BeanContext;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
@@ -35,6 +36,8 @@ public class Level {
     private static double[] generalScoreIncrease = new double[5];
     private static double[] generalScoreDecrease = new double[5];
 
+    private Line currentLine = null;
+
     public Level(JSONObject config) {
         layoutFilePath = config.getString("layout");
         timeLimit = config.getInt("time");
@@ -45,6 +48,49 @@ public class Level {
         setCells();
         setBalls(config);
         adjustScoreAmounts();
+    }
+
+    /**
+     * Method to add a line to the level with mouse press
+     * @param x X pos of mouse
+     * @param y Y pos of mouse
+     */
+    void addLineMouse(int x, int y) {
+        if (currentLine != null) {
+            throw new RuntimeException("Cannot add line before old current line has been removed");
+        }
+
+        currentLine = new Line(new Vec2(x, y));
+        lines.add(currentLine);
+    }
+
+    /**
+     * Method to add a point to the line currently being added
+     * @param x
+     * @param y
+     */
+    void addCurrentLinePoint(int x, int y) {
+        if (currentLine == null) {
+            throw new RuntimeException("Cannot add point to non existent line");
+        }
+
+        currentLine.addPoint(new Vec2(x, y));
+    }
+
+    /**
+     * If the pos collides with a section of a line, tries to remove that line
+     * @param x
+     * @param y
+     */
+    void removeCurrentLinePoint(int x, int y) {
+        //TODO
+    }
+
+    /**
+     * Call when mouse is lifted to stop adding points to this line
+     */
+    void removeCurrentLine() {
+        this.currentLine = null;
     }
 
     /**
@@ -88,16 +134,11 @@ public class Level {
 
     void draw(PApplet window) {
         drawCells(window);
-        drawLines(window);
         drawBalls(window);
+        drawLines(window);
     }
 
     void drawLines(PApplet window) {
-        //TODO: handle collision
-        for (Ball ball : this.balls) {
-            this.handleLinesCollision(ball);
-        }
-
         for (Line line : this.lines) {
             line.draw(window);
         }
@@ -105,8 +146,13 @@ public class Level {
 
     void handleLinesCollision(Ball ball) {
         for (Line line : this.lines) {
-            line.handleCollision(ball);
+            if (line.handleCollision(ball)) {
+                this.lines.remove(line);
+                return;
+            }
         }
+
+        return;
     }
 
     /**
@@ -129,9 +175,24 @@ public class Level {
                         collided = cells[x][y].handleCollision(b, this.getNeighborsArr(x, y));
                     }
                 }
+                if (collided) { break; }
             }
 
-            // distance to center of closest hole
+            for (Ball ball : this.balls) {
+                this.handleLinesCollision(ball);
+            }
+
+            if (!collided) {
+                Vec2 c = b.getPosVec();
+                if (c.x - Ball.radius < 0 || c.x + Ball.radius > App.WIDTH) {
+                    b.bounceX();
+                }
+
+                if (c.y - Ball.radius < 0 || c.x + Ball.radius > App.HEIGHT) {
+                    b.bounceY();
+                }
+            }
+
             Vec2 hole = this.handleHole(b);
 
             if (hole != null) {

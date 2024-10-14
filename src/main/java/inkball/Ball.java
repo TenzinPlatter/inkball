@@ -47,6 +47,21 @@ public class Ball {
         this.dy = newVel.y;
     }
 
+    /**
+     * Multiples the balls x velocity by -1
+     */
+    void bounceX() {
+        this.dx *= -1;
+    }
+
+    /**
+     * Multiples the balls y velocity by -1
+     */
+    void bounceY() {
+        this.dy *= -1;
+    }
+
+
     Vec2 getVelVec() {
         return new Vec2(this.dx, this.dy);
     }
@@ -85,12 +100,12 @@ public class Ball {
 
     private void initVelocity() {
         // returns 0 - 1
-        int xDir = random.nextInt(2);
-        int yDir = random.nextInt(2);
+        int xDir = random.nextInt(1);
+        int yDir = random.nextInt(1);
 
         // gives either 2 or -2
-        dx = 2 - (4 * xDir);
-        dy = 2 - (4 * yDir);
+        dx = 1 - (2 * xDir);
+        dy = 1 - (2 * yDir);
     }
 
     void move() {

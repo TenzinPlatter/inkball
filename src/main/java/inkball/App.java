@@ -146,20 +146,21 @@ public class App extends PApplet {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        // create a new player-drawn line object
+        this.currentLevel.addLineMouse(mouseX, mouseY);
     }
 	
 	@Override
     public void mouseDragged(MouseEvent e) {
-        // add line segments to player-drawn line object if left mouse button is held
-		
-		// remove player-drawn line object if right mouse button is held 
-		// and mouse position collides with the line
+        if (mouseButton == LEFT) {
+            this.currentLevel.addCurrentLinePoint(mouseX, mouseY);
+        } else if (mouseButton == RIGHT) {
+            this.currentLevel.removeCurrentLinePoint(mouseX, mouseY);
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-		
+        this.currentLevel.removeCurrentLine();
     }
 
     /**

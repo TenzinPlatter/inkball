@@ -34,7 +34,7 @@ public class Cell {
     /**
      * Handles collision for a given ball on this cell, should be called before move
      * @param ball Ball to check
-     * @param neighbors Array of bools, stating wether or not the cell has surrounding cells,
+     * @param neighbors Array of bools, stating whether or not the cell has surrounding cells,
      *                  in the order -> Above, Below, Left, Right
      * @return Returns true if collision has happened, false otherwise
      */
@@ -66,16 +66,17 @@ public class Cell {
             ball.setSprite("ball" + colorCode);
         }
 
+        //TODO: fix bug with side hit changing y velo, maybe add velo checks for direction?
         if (
-                v.x > x + size && !neighbors[RIGHT]
-                || v.x < x && !neighbors[LEFT]
+                (v.x > x + size && !neighbors[RIGHT])
+                || (v.x < x && !neighbors[LEFT])
         ) {
             ball.dx *= -1;
         }
 
         if (
-                v.y > y && !neighbors[BELOW]
-                || v.y < y + size && !neighbors[ABOVE]
+                (v.y > y && !neighbors[BELOW])
+                || (v.y < y + size && !neighbors[ABOVE])
         ) {
             ball.dy *= -1;
         }

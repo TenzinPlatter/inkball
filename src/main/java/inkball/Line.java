@@ -24,6 +24,8 @@ public class Line {
         Vec2 a = null;
         Vec2 b = null;
         Vec2 ballP = ball.getPosVec();
+        // 32 offset here stops ball from bouncing before/ after line
+        ballP = new Vec2(ballP.x, ballP.y + 32);
         Vec2 ballV = ball.getVelVec();
 
         for (int i = 0; i < points.size() - 1; i++) {
@@ -32,9 +34,11 @@ public class Line {
 
 
             // colliding with wall section
+            // 32 offset here makes ball bounce off close side off wall rather than travelling
+            // through and bouncing off far edge
             if (
                     u.distanceTo(ballP) + v.distanceTo(ballP)
-                    < u.distanceTo(v) + (Ball.radius * ball.spriteScaleFactor)
+                    < u.distanceTo(v) + (Ball.radius * ball.spriteScaleFactor) + 32
             ) {
                 a = u;
                 b = v;
@@ -71,24 +75,23 @@ public class Line {
                 ballV.y - (k * closest.y)
         );
 
-        ball.setVel()
+        ball.setVel(newVel);
 
         return true;
     }
 
+    /**
+     * Draws a line, won't draw lines with only one point
+     * @param window Surface to be drawn to
+     */
     void draw(PApplet window) {
-        Vec2 last = null;
+        Vec2 last = points.get(0);
+
         for (Vec2 point : points) {
-            // round end of lines and turns
-            window.ellipse(point.x, point.y, 1, 1);
-
-            if (last == null) {
-                last = point;
-                continue;
-            }
-
             window.strokeWeight(10);
             window.line(last.x, last.y, point.x, point.y);
+
+            last = point;
         }
     }
 }
