@@ -7,9 +7,7 @@ import processing.data.JSONObject;
 import java.beans.beancontext.BeanContext;
 import java.io.*;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
+import java.util.*;
 
 public class Level {
     private static int GREY = 0;
@@ -158,8 +156,6 @@ public class Level {
                 return;
             }
         }
-
-        return;
     }
 
     /**
@@ -167,7 +163,8 @@ public class Level {
      * @param window Window to draw onto
      */
     void drawBalls(PApplet window) {
-        for (Iterator<Ball> it = balls.iterator(); it.hasNext(); ) {
+        List<Ball> toAdd = new ArrayList<>();
+        for (Iterator<Ball> it = this.balls.iterator(); it.hasNext(); ) {
             Ball b = it.next();
 
             if (!b.hasSpawned()) {
@@ -193,6 +190,7 @@ public class Level {
                 this.handleLinesCollision(ball);
             }
 
+            // collision with edges of window
             if (!collided) {
                 Vec2 c = b.getPosVec();
                 if (c.x - Ball.radius < 0 || c.x + Ball.radius > App.WIDTH) {
@@ -204,32 +202,36 @@ public class Level {
                 }
             }
 
-            Vec2 hole = this.handleHole(b);
+            // handles all hole logic
+            Vec2 holeLoc = this.handleHole(b);
+            if (holeLoc != null) {
+                Cell hole = cells[(int)holeLoc.x][(int)holeLoc.y];
+                if (b.color == 0 || hole.getColorFor("hole") == 0) {
+                    App.addScore(this.scoreIncrease[b.color]);
+                    System.out.println("Score adjustment: " + this.scoreIncrease[b.color]);
+                }
 
-            if (hole != null) {
-                this.handleCapture(b, cells[(int) hole.x][(int) hole.y]);
+                else if (b.color == hole.getColorFor("hole")) {
+                    App.addScore(this.scoreIncrease[b.color]);
+                    System.out.println("Score adjustment: " + this.scoreIncrease[b.color]);
+                }
+
+                else {
+                    toAdd.add(new Ball(b.color));
+                    App.addScore(-1 * this.scoreDecrease[b.color]);
+                    System.out.println("Score adjustment: -" + this.scoreDecrease[b.color]);
+                }
+
                 it.remove();
+                continue;
             }
 
             b.move();
             b.draw(window);
         }
-    }
 
-    void handleCapture(Ball ball, Cell hole) {
-        if (ball.color == 0 || hole.getColorFor("hole") == 0) {
-            App.addScore(this.scoreIncrease[ball.color]);
-        }
-
-        else if (ball.color == hole.getColorFor("hole")) {
-            App.addScore(this.scoreIncrease[ball.color]);
-        }
-
-        else {
-            // move ball to back of queue as a copy
-            this.balls.add(new Ball(ball.color));
-            App.addScore(-1 * this.scoreDecrease[ball.color]);
-        }
+        // add any balls that were captured and need to be respawned
+        this.balls.addAll(toAdd);
     }
 
     /**
@@ -414,7 +416,7 @@ public class Level {
     }
 
     void giveBallInit(char colorCode, int x, int y) {
-        int color = (int) (colorCode - '0');
+        int color = colorCode - '0';
         if (color < 0 || color > 4) {
             throw new IllegalArgumentException("Illegal color code: " + color);
         }

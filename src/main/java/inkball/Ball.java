@@ -9,6 +9,7 @@ public class Ball {
     PImage sprite;
     int color;
     private boolean hasSpawned = false;
+    private boolean killed = false;
     private Vec2 pos = new Vec2(0, 0);
     float dx = 0;
     float dy = 0;
@@ -24,12 +25,16 @@ public class Ball {
         initVelocity();
     }
 
-    Vec2 getPosVec() {
-        return this.pos;
+    void kill() {
+        this.killed = true;
     }
 
-    void kill() {
-        this.hasSpawned = false;
+    boolean isDead() {
+        return this.killed;
+    }
+
+    Vec2 getPosVec() {
+        return this.pos;
     }
 
     void spawn() {
@@ -104,8 +109,8 @@ public class Ball {
 
     private void initVelocity() {
         // returns 0 - 1
-        int xDir = random.nextInt(1);
-        int yDir = random.nextInt(1);
+        int xDir = random.nextInt(2);
+        int yDir = random.nextInt(2);
 
         // gives either 1 or -1
         // (not 2 as using 60fps)
@@ -119,10 +124,6 @@ public class Ball {
     }
 
     void draw(PApplet window) {
-        if (!this.hasSpawned) {
-            return;
-        }
-
         float xPos = (float)(this.pos.x - Ball.radius);
         float yPos = (float)(this.pos.y + Ball.radius);
 

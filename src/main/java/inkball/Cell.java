@@ -62,8 +62,9 @@ public class Cell {
         }
 
         int colorCode = this.getColorFor("wall");
-        if (colorCode != -1) {
+        if (colorCode != 0) {
             ball.setSprite("ball" + colorCode);
+            ball.color = colorCode;
         }
 
         //TODO: fix bug with side hit changing y velo, maybe add velo checks for direction?
@@ -87,7 +88,7 @@ public class Cell {
     /**
      * Method to check the color of a given type of sprite
      * @param type Either hole or wall
-     * @return returns integer code corresponding to color, -1 for no color/grey
+     * @return returns integer code corresponding to color, 0 for no color/grey
      * 1 -> orange
      * 2 -> blue
      * 3 -> green
@@ -100,7 +101,7 @@ public class Cell {
             }
         }
 
-        return -1;
+        return 0;
     }
 
     boolean isWall() {
