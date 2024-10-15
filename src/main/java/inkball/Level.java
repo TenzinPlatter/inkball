@@ -16,12 +16,18 @@ public class Level {
     private static int GREEN = 3;
     private static int YELLOW = 4;
 
+    private int timeLeft;
+    private long timerLast = System.currentTimeMillis();
+
     private String layoutFilePath;
-    private int timeLimit;
     private int spawnInterval;
     private long lastSpawnTime;
     private double increaseModifier;
     private double decreaseModifier;
+
+    private boolean paused = false;
+    private long pausedTimeDiff = 0;
+    private boolean justPaused = false;
 
     private ArrayList<Ball> balls = new ArrayList<>();
     private ArrayList<int[]> spawnerLocs = new ArrayList<>();
@@ -40,7 +46,7 @@ public class Level {
 
     public Level(JSONObject config) {
         layoutFilePath = config.getString("layout");
-        timeLimit = config.getInt("time");
+        timeLeft = config.getInt("time");
         spawnInterval = config.getInt("spawn_interval");
         increaseModifier = config.getFloat("score_increase_from_hole_capture_modifier");
         decreaseModifier = config.getFloat("score_decrease_from_wrong_hole_modifier");
@@ -48,6 +54,21 @@ public class Level {
         setCells();
         setBalls(config);
         adjustScoreAmounts();
+    }
+
+    /**
+     * Pauses game if unpaused and vice versa
+     */
+    void togglePause() {
+        //TODO: DISPLAY **PAUSED** in top bar
+        if (!this.paused) {
+            this.pausedTimeDiff = System.currentTimeMillis();
+        } else {
+            this.pausedTimeDiff = System.currentTimeMillis() - this.pausedTimeDiff;
+            this.justPaused = true;
+        }
+
+        this.paused = !this.paused;
     }
 
     /**
@@ -104,11 +125,16 @@ public class Level {
      * @return
      */
     void trySpawnNext(long time) {
+        if (this.justPaused) {
+            this.lastSpawnTime += this.pausedTimeDiff;
+            this.justPaused = false;
+        }
+
         float timePassedInSeconds = (time - lastSpawnTime) / 1000;
 
         boolean timerPassed = timePassedInSeconds > spawnInterval;
 
-        if (!timerPassed) {
+        if (!timerPassed || this.paused) {
             return;
         }
 
@@ -138,9 +164,40 @@ public class Level {
     }
 
     void draw(PApplet window) {
+        this.trySpawnNext(System.currentTimeMillis());
+        this.handleTimer(System.currentTimeMillis());
+
+        window.background(223);
+
+        // keep this order
         drawCells(window);
         drawBalls(window);
         drawLines(window);
+
+        drawText(window);
+    }
+
+    void handleTimer(long time) {
+        int timeInSeconds = (int) (time - this.timerLast) / 1000;
+
+        if (timeInSeconds > 0) {
+            this.timerLast = time;
+            this.timeLeft--;
+        }
+    }
+
+    void drawText(PApplet window) {
+        window.fill(0);
+
+        window.textAlign(PApplet.RIGHT, PApplet.BOTTOM);
+        window.textSize(18);
+        window.text("Time: " + this.timeLeft, App.WIDTH - 10, App.TOPBAR - 8);
+
+        if (this.paused) {
+            window.textAlign(PApplet.CENTER, PApplet.CENTER);
+            window.textSize(50);
+            window.text("***PAUSED***", App.WIDTH/2f, App.TOPBAR/2f);
+        }
     }
 
     void drawLines(PApplet window) {
@@ -197,7 +254,7 @@ public class Level {
                     b.bounceX();
                 }
 
-                if (c.y - Ball.radius < 0 || c.x + Ball.radius > App.HEIGHT) {
+                if (c.y - Ball.radius < App.TOPBAR || c.x + Ball.radius > App.HEIGHT) {
                     b.bounceY();
                 }
             }
@@ -207,26 +264,25 @@ public class Level {
             if (holeLoc != null) {
                 Cell hole = cells[(int)holeLoc.x][(int)holeLoc.y];
                 if (b.color == 0 || hole.getColorFor("hole") == 0) {
-                    App.addScore(this.scoreIncrease[b.color]);
-                    System.out.println("Score adjustment: " + this.scoreIncrease[b.color]);
+                    App.addScore((float) this.scoreIncrease[b.color]);
                 }
 
                 else if (b.color == hole.getColorFor("hole")) {
-                    App.addScore(this.scoreIncrease[b.color]);
-                    System.out.println("Score adjustment: " + this.scoreIncrease[b.color]);
+                    App.addScore((float) this.scoreIncrease[b.color]);
                 }
 
                 else {
                     toAdd.add(new Ball(b.color));
-                    App.addScore(-1 * this.scoreDecrease[b.color]);
-                    System.out.println("Score adjustment: -" + this.scoreDecrease[b.color]);
+                    App.addScore(-1 * (float) this.scoreDecrease[b.color]);
                 }
 
                 it.remove();
                 continue;
             }
 
-            b.move();
+            if (!this.paused) {
+                b.move();
+            }
             b.draw(window);
         }
 
@@ -474,7 +530,8 @@ public class Level {
 
     void displayConfig() {
         System.out.printf("Layout File: %s\n", layoutFilePath);
-        System.out.printf("Max time: %d\n", timeLimit);
+        // Max time not accurate unless run before level is played
+        System.out.printf("Max time: %d\n", timeLeft);
         System.out.printf("Spawn Interval: %d\n", spawnInterval);
         System.out.printf("Score increase modifier: %f\n", increaseModifier);
         System.out.printf("Score decrease modifier: %f\n", decreaseModifier);

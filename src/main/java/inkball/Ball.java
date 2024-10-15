@@ -124,8 +124,8 @@ public class Ball {
     }
 
     void draw(PApplet window) {
-        float xPos = (float)(this.pos.x - Ball.radius);
-        float yPos = (float)(this.pos.y + Ball.radius);
+        float xPos = this.pos.x - Ball.radius;
+        float yPos = this.pos.y + Ball.radius;
 
         // same size for both width and height
         float size = Ball.radius * this.spriteScaleFactor * 2;

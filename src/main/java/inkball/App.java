@@ -38,7 +38,7 @@ public class App extends PApplet {
     Level currentLevel;
     int currentLevelIndex = 0;
 
-    static private double score = 0;
+    static private float score = 0;
 
     public App() {
         this.configPath = "config.json";
@@ -101,7 +101,10 @@ public class App extends PApplet {
 
     PImage loadImageFromPath(String filename) {
         try {
-            return loadImage(URLDecoder.decode(this.getClass().getResource(filename).getPath(), StandardCharsets.UTF_8.name()));
+            return loadImage(
+                    URLDecoder.decode(this.getClass().getResource(filename).getPath(),
+                    StandardCharsets.UTF_8.name())
+            );
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -124,7 +127,7 @@ public class App extends PApplet {
         }
     }
 
-    static void addScore(double amount) {
+    static void addScore(float amount) {
         App.score += amount;
     }
 
@@ -133,7 +136,9 @@ public class App extends PApplet {
      */
 	@Override
     public void keyPressed(KeyEvent event){
-        
+        if (key == ' ') {
+            this.currentLevel.togglePause();
+        }
     }
 
     /**
@@ -171,28 +176,22 @@ public class App extends PApplet {
 	@Override
     public void draw() {
         if (currentLevel.levelOver()) {
+            //TODO: game over message
             currentLevelIndex++;
             currentLevel = levels.get(currentLevelIndex);
         }
 
-        currentLevel.trySpawnNext(System.currentTimeMillis());
-
         currentLevel.draw(this);
 
-        //----------------------------------
-        //display Board for current level:
-        //----------------------------------
-        //TODO
+        this.drawScore();
+    }
 
-        //----------------------------------
-        //display score
-        //----------------------------------
-        //TODO
-        
-		//----------------------------------
-        //----------------------------------
-		//display game end message
+    void drawScore() {
+        fill(0);
+        textAlign(RIGHT, BOTTOM);
+        textSize(18);
 
+        text("Score: " + (int) App.score, App.WIDTH - 10, App.TOPBAR - 26);
     }
 
 
