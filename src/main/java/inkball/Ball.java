@@ -6,31 +6,32 @@ import processing.core.PImage;
 import java.util.Random;
 
 public class Ball {
-    PImage sprite;
+    private PImage sprite;
     int color;
     private boolean hasSpawned = false;
-    private boolean killed = false;
-    private Vec2 pos = new Vec2(0, 0);
+    private final Vec2 pos = new Vec2(0, 0);
     float dx = 0;
     float dy = 0;
     float spriteScaleFactor = 1f;
+
     // set as a float for division in draw section
     static final float radius = 12;
     static Random random = new Random();
 
-    public Ball(int color, boolean isInit) {
+    /**
+     * Just used as an overload, will have the same functionality regardless of value of isInit
+     * @param color
+     * @param dummy
+     */
+    public Ball(int color, boolean dummy) {
         this.color = color;
         this.hasSpawned = true;
         setSprite("ball" + this.color);
         initVelocity();
     }
 
-    void kill() {
-        this.killed = true;
-    }
-
-    boolean isDead() {
-        return this.killed;
+    PImage getSprite() {
+        return this.sprite;
     }
 
     Vec2 getPosVec() {

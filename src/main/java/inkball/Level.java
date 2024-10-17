@@ -4,9 +4,7 @@ import processing.core.PApplet;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
-import java.beans.beancontext.BeanContext;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class Level {
@@ -25,9 +23,11 @@ public class Level {
     private double increaseModifier;
     private double decreaseModifier;
 
+    private float nextBallSpawnLastMeasuredTimeTill = 0;
+
     private boolean paused = false;
     private long pausedTimeDiff = 0;
-    private boolean justPaused = false;
+    private boolean justUnpaused = false;
 
     private ArrayList<Ball> balls = new ArrayList<>();
     private ArrayList<int[]> spawnerLocs = new ArrayList<>();
@@ -60,12 +60,11 @@ public class Level {
      * Pauses game if unpaused and vice versa
      */
     void togglePause() {
-        //TODO: DISPLAY **PAUSED** in top bar
         if (!this.paused) {
             this.pausedTimeDiff = System.currentTimeMillis();
         } else {
             this.pausedTimeDiff = System.currentTimeMillis() - this.pausedTimeDiff;
-            this.justPaused = true;
+            this.justUnpaused = true;
         }
 
         this.paused = !this.paused;
@@ -92,7 +91,8 @@ public class Level {
      */
     void addCurrentLinePoint(int x, int y) {
         if (currentLine == null) {
-            throw new RuntimeException("Cannot add point to non existent line");
+            // shouldn't be able to get here as it means mouseDragged was triggered after MB1 was raised
+            return;
         }
 
         currentLine.addPoint(new Vec2(x, y));
@@ -125,14 +125,13 @@ public class Level {
      * @return
      */
     void trySpawnNext(long time) {
-        if (this.justPaused) {
+        if (this.justUnpaused) {
             this.lastSpawnTime += this.pausedTimeDiff;
-            this.justPaused = false;
         }
 
-        float timePassedInSeconds = (time - lastSpawnTime) / 1000;
+        float timePassedInSeconds = (time - lastSpawnTime) / 1000f;
 
-        boolean timerPassed = timePassedInSeconds > spawnInterval;
+        boolean timerPassed = timePassedInSeconds >= spawnInterval;
 
         if (!timerPassed || this.paused) {
             return;
@@ -153,19 +152,10 @@ public class Level {
         return this.balls.isEmpty();
     }
 
-    void printCells() {
-        for (int y = 0; y < 18; y++) {
-            for (int x = 0; x < 18; x++) {
-                Cell c = cells[x][y];
-                int[] pos = c.getPos(true);
-                System.out.printf("Cell at (%d, %d) - type: %s\n", pos[0], pos[1], c.getType());
-            }
-        }
-    }
-
     void draw(PApplet window) {
-        this.trySpawnNext(System.currentTimeMillis());
         this.handleTimer(System.currentTimeMillis());
+        this.trySpawnNext(System.currentTimeMillis());
+        this.justUnpaused = false;
 
         window.background(223);
 
@@ -174,10 +164,55 @@ public class Level {
         drawBalls(window);
         drawLines(window);
 
+        drawTopBar(window);
+    }
+
+    void drawTopBar(PApplet window) {
         drawText(window);
+        drawNextBalls(window);
+    }
+
+    void drawNextBalls(PApplet window) {
+        window.fill(0);
+        window.strokeWeight(4);
+
+        // Rect for room for 5 balls with diameter 32 and gap of 10 between each ball, space-around
+        window.rect(10, 10, 210, 37);
+
+        int count = 0;
+        int i = 0;
+        while (count < 5) {
+            Ball ball;
+            try {
+                ball = this.balls.get(i);
+            } catch (IndexOutOfBoundsException e) {
+                break;
+            }
+
+            if (ball.hasSpawned()) {
+                i++;
+                continue;
+            }
+
+            // start of rect + side padding + offset for each ball
+            int xPos = 10 + 5 + count * (32 + 10);
+            window.image(ball.getSprite(), xPos, 10 + 5);
+
+            count++;
+            i++;
+            //TODO: moving animation
+        }
     }
 
     void handleTimer(long time) {
+        if (this.justUnpaused) {
+            this.timerLast += this.pausedTimeDiff;
+        }
+
+        if (this.paused) {
+            return;
+        }
+
         int timeInSeconds = (int) (time - this.timerLast) / 1000;
 
         if (timeInSeconds > 0) {
@@ -193,10 +228,23 @@ public class Level {
         window.textSize(18);
         window.text("Time: " + this.timeLeft, App.WIDTH - 10, App.TOPBAR - 8);
 
+        float timeTillNextSpawn;
+
+        if (!this.paused) {
+            float timePassedInSeconds = (System.currentTimeMillis() - lastSpawnTime) / 1000f;
+            timeTillNextSpawn = spawnInterval - timePassedInSeconds;
+            this.nextBallSpawnLastMeasuredTimeTill = timeTillNextSpawn;
+        } else {
+            timeTillNextSpawn = this.nextBallSpawnLastMeasuredTimeTill;
+        }
+
+        window.textAlign(PApplet.LEFT, PApplet.BOTTOM);
+        window.text(String.format("%.1f", timeTillNextSpawn), 230, App.TOPBAR - 8);
+
         if (this.paused) {
             window.textAlign(PApplet.CENTER, PApplet.CENTER);
-            window.textSize(50);
-            window.text("***PAUSED***", App.WIDTH/2f, App.TOPBAR/2f);
+            window.textSize(30);
+            window.text("***PAUSED***", App.WIDTH/2f + 70, App.TOPBAR/2f - 15);
         }
     }
 
@@ -287,7 +335,9 @@ public class Level {
         }
 
         // add any balls that were captured and need to be respawned
-        this.balls.addAll(toAdd);
+        if (!toAdd.isEmpty()) {
+            this.balls.addAll(toAdd);
+        }
     }
 
     /**
@@ -500,13 +550,6 @@ public class Level {
         }
     }
 
-    void printBallColors() {
-        for (Ball b : balls) {
-            System.out.printf("Ball: %s\n", b.color);
-        }
-    }
-
-
     void adjustScoreAmounts() {
         for (int i = 0; i < generalScoreIncrease.length; i++) {
             scoreIncrease[i] = generalScoreIncrease[i] * increaseModifier;
@@ -526,36 +569,5 @@ public class Level {
         generalScoreDecrease[BLUE] = decrease.getInt("blue");
         generalScoreDecrease[GREEN] = decrease.getInt("green");
         generalScoreDecrease[YELLOW] = decrease.getInt("yellow");
-    }
-
-    void displayConfig() {
-        System.out.printf("Layout File: %s\n", layoutFilePath);
-        // Max time not accurate unless run before level is played
-        System.out.printf("Max time: %d\n", timeLeft);
-        System.out.printf("Spawn Interval: %d\n", spawnInterval);
-        System.out.printf("Score increase modifier: %f\n", increaseModifier);
-        System.out.printf("Score decrease modifier: %f\n", decreaseModifier);
-
-        System.out.println();
-        System.out.println("Ball Colours:");
-        for (Ball b : balls) {
-            System.out.println("Ball: " + b.color);
-        }
-
-        System.out.println();
-        System.out.println("Points for colors:");
-        System.out.println("Grey: " + scoreIncrease[GREY]);
-        System.out.println("Orange: " + scoreIncrease[ORANGE]);
-        System.out.println("Blue: " + scoreIncrease[BLUE]);
-        System.out.println("Green: " + scoreIncrease[GREEN]);
-        System.out.println("Yellow: " + scoreIncrease[YELLOW]);
-
-        System.out.println();
-        System.out.println("Point loss for colors:");
-        System.out.println("Grey: " + generalScoreDecrease[GREY]);
-        System.out.println("Orange: " + generalScoreDecrease[ORANGE]);
-        System.out.println("Blue: " + generalScoreDecrease[BLUE]);
-        System.out.println("Green: " + generalScoreDecrease[GREEN]);
-        System.out.println("Yellow: " + generalScoreDecrease[YELLOW]);
     }
 }

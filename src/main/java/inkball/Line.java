@@ -99,8 +99,8 @@ public class Line {
     void draw(PApplet window) {
         Vec2 last = points.get(0);
 
+        window.strokeWeight(10);
         for (Vec2 point : points) {
-            window.strokeWeight(10);
             window.line(last.x, last.y, point.x, point.y);
 
             last = point;
