@@ -68,6 +68,7 @@ public class Cell {
         }
 
         //TODO: fix bug with side hit changing y velo, maybe add velo checks for direction?
+        //TODO: bug with balls hitting y walls too high or phasing though a bit of floor, maybe only on mac?
         if (
                 (v.x > x + size && !neighbors[RIGHT])
                 || (v.x < x && !neighbors[LEFT])

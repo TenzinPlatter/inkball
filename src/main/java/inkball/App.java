@@ -35,6 +35,8 @@ public class App extends PApplet {
     static HashMap<String, PImage> sprites = new HashMap<>();
     ArrayList<Level> levels = new ArrayList<>();
 
+    private JSONArray levelConfigs;
+
     Level currentLevel;
     int currentLevelIndex = 0;
 
@@ -69,7 +71,7 @@ public class App extends PApplet {
     }
 
     void loadLevels() {
-        JSONArray levelConfigs = config.getJSONArray("levels");
+        this.levelConfigs = config.getJSONArray("levels");
         JSONObject ballScoreIncrease = config.getJSONObject("score_increase_from_hole_capture");
         JSONObject ballScoreDecrease = config.getJSONObject("score_decrease_from_wrong_hole");
 
@@ -138,6 +140,11 @@ public class App extends PApplet {
     public void keyPressed(KeyEvent event){
         if (key == ' ') {
             this.currentLevel.togglePause();
+        }
+
+        if (key == 'r') {
+            App.score -= this.currentLevel.currentScore;
+            this.currentLevel = new Level(levelConfigs.getJSONObject(this.currentLevelIndex));
         }
     }
 

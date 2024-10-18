@@ -36,6 +36,8 @@ public class Level {
 
     private Cell[][] cells = new Cell[18][18];
 
+    public float currentScore = 0;
+
     private double[] scoreIncrease = new double[5];
     private double[] scoreDecrease = new double[5];
 
@@ -44,7 +46,11 @@ public class Level {
 
     private Line currentLine = null;
 
+    private JSONObject config;
+
     public Level(JSONObject config) {
+        this.config = config;
+
         layoutFilePath = config.getString("layout");
         timeLeft = config.getInt("time");
         spawnInterval = config.getInt("spawn_interval");
@@ -312,16 +318,16 @@ public class Level {
             if (holeLoc != null) {
                 Cell hole = cells[(int)holeLoc.x][(int)holeLoc.y];
                 if (b.color == 0 || hole.getColorFor("hole") == 0) {
-                    App.addScore((float) this.scoreIncrease[b.color]);
+                    this.addScore((float) this.scoreIncrease[b.color]);
                 }
 
                 else if (b.color == hole.getColorFor("hole")) {
-                    App.addScore((float) this.scoreIncrease[b.color]);
+                    this.addScore((float) this.scoreIncrease[b.color]);
                 }
 
                 else {
                     toAdd.add(new Ball(b.color));
-                    App.addScore(-1 * (float) this.scoreDecrease[b.color]);
+                    this.addScore(-1 * (float) this.scoreDecrease[b.color]);
                 }
 
                 it.remove();
@@ -338,6 +344,11 @@ public class Level {
         if (!toAdd.isEmpty()) {
             this.balls.addAll(toAdd);
         }
+    }
+
+    void addScore(float adjustment) {
+        this.currentScore += adjustment;
+        App.addScore(this.currentScore);
     }
 
     /**
