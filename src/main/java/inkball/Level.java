@@ -171,6 +171,16 @@ public class Level {
         drawLines(window);
 
         drawTopBar(window);
+
+        // level won
+        if (this.balls.isEmpty()) {
+            return;
+        }
+
+        // level lost
+        if (this.timeLeft <= 0) {
+            return;
+        }
     }
 
     void drawTopBar(PApplet window) {
