@@ -15,17 +15,11 @@ public class Ball {
     float spriteScaleFactor = 1f;
 
     // set as a float for division in draw section
-    static final float radius = 12;
+    static final float radius = 12f;
     static Random random = new Random();
 
-    /**
-     * Just used as an overload, will have the same functionality regardless of value of isInit
-     * @param color
-     * @param dummy
-     */
-    public Ball(int color, boolean dummy) {
+    public Ball(int color) {
         this.color = color;
-        this.hasSpawned = true;
         setSprite("ball" + this.color);
         initVelocity();
     }
@@ -35,7 +29,7 @@ public class Ball {
     }
 
     Vec2 getPosVec() {
-        return this.pos;
+        return this.pos.copy();
     }
 
     void spawn() {
@@ -44,12 +38,6 @@ public class Ball {
 
     boolean hasSpawned() {
         return this.hasSpawned;
-    }
-
-    public Ball(int color) {
-        this.color = color;
-        setSprite("ball" + this.color);
-        initVelocity();
     }
 
     void setVel(Vec2 newVel) {
@@ -73,7 +61,7 @@ public class Ball {
 
 
     Vec2 getVelVec() {
-        return new Vec2(this.dx, this.dy);
+        return new Vec2(this.dx, this.dy).copy();
     }
 
     /**
@@ -126,7 +114,7 @@ public class Ball {
 
     void draw(PApplet window) {
         float xPos = this.pos.x - Ball.radius;
-        float yPos = this.pos.y + Ball.radius;
+        float yPos = this.pos.y - Ball.radius;
 
         // same size for both width and height
         float size = Ball.radius * this.spriteScaleFactor * 2;

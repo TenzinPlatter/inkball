@@ -9,6 +9,10 @@ public class Vec2 {
         this.y =y;
     }
 
+    Vec2 copy() {
+        return new Vec2(this.x, this.y);
+    }
+
     /**
      * Converts this vecs position from coords to position, does not check for valid coords
      * @return New vec

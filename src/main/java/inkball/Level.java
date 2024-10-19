@@ -13,8 +13,7 @@ public class Level {
     private static int BLUE = 2;
     private static int GREEN = 3;
     private static int YELLOW = 4;
-
-    private int timeLeft;
+    int timeLeft;
     private long timerLast = System.currentTimeMillis();
 
     private String layoutFilePath;
@@ -27,9 +26,7 @@ public class Level {
 
     private boolean paused = false;
     private long pausedTimeDiff = 0;
-    private boolean justUnpaused = false;
-
-    private ArrayList<Ball> balls = new ArrayList<>();
+    private boolean justUnpaused = false; private ArrayList<Ball> balls = new ArrayList<>();
     private ArrayList<int[]> spawnerLocs = new ArrayList<>();
     private ArrayList<Vec2> holeLocs = new ArrayList<>();
     private ArrayList<Line> lines = new ArrayList<>();
@@ -46,11 +43,11 @@ public class Level {
 
     private Line currentLine = null;
 
-    private JSONObject config;
+    boolean inEndAnim = false;
+    private int framesSinceLastScoreAdd = 0;
+    private Vec2[] currentYellowCells = new Vec2[2];
 
     public Level(JSONObject config) {
-        this.config = config;
-
         layoutFilePath = config.getString("layout");
         timeLeft = config.getInt("time");
         spawnInterval = config.getInt("spawn_interval");
@@ -60,6 +57,30 @@ public class Level {
         setCells();
         setBalls(config);
         adjustScoreAmounts();
+    }
+
+    boolean timerEmpty() {
+        return this.timeLeft <= 0;
+    }
+
+    void startLevelEndAnim() {
+        this.inEndAnim = true;
+
+        this.cells[0][0].setYellowWall();
+        this.cells[this.cells.length - 1][this.cells[0].length - 1].setYellowWall();
+
+        this.currentYellowCells = new Vec2[] {
+                new Vec2(0, 0),
+                new Vec2(this.cells.length - 1, this.cells[0].length - 1)
+        };
+    }
+
+    void removeBall() {
+        //TODO: remove this only for testing
+
+        try {
+            this.balls.remove(this.balls.get(0));
+        } catch (IndexOutOfBoundsException ignored) {}
     }
 
     /**
@@ -143,10 +164,17 @@ public class Level {
             return;
         }
 
+        Random random = new Random();
         for (Ball b : this.balls) {
             if (b.hasSpawned()) {
                 continue;
             }
+
+
+            int j = random.nextInt(spawnerLocs.size());
+            int[] initPos = spawnerLocs.get(j);
+
+            b.setInitPos(initPos[0], initPos[1]);
 
             b.spawn();
             lastSpawnTime = time;
@@ -158,10 +186,65 @@ public class Level {
         return this.balls.isEmpty();
     }
 
+    void rotateYellowCells() {
+        if (!this.inEndAnim) {
+            throw new RuntimeException("Cannot rotate yellow cells out of animation");
+        }
+
+        for (Vec2 v : this.currentYellowCells) {
+            this.cells[(int) v.x][(int) v.y].setOldWall();
+
+            if (v.x == 17) {
+                if (v.y < 17) {
+                    v.y++;
+                } else {
+                    v.x--;
+                }
+            }
+            if (v.x == 0) {
+                if (v.y > 0) {
+                    v.y--;
+                } else {
+                    v.x++;
+                }
+            }
+            // corners will be caught earlier by x conditions
+            if (v.y == 17) {
+                v.x--;
+            }
+            if (v.y == 0) {
+                v.x++;
+            }
+
+            this.cells[(int) v.x][(int) v.y].setYellowWall();
+        }
+    }
+
+    void handleEndAnimation() {
+        if (this.framesSinceLastScoreAdd < 4) {
+            this.framesSinceLastScoreAdd++;
+            return;
+        }
+
+        this.framesSinceLastScoreAdd = 0;
+        this.addScore(1);
+        this.timeLeft--;
+
+        this.rotateYellowCells();
+
+        if (this.timerEmpty()) {
+            this.inEndAnim = false;
+        }
+    }
+
     void draw(PApplet window) {
-        this.handleTimer(System.currentTimeMillis());
-        this.trySpawnNext(System.currentTimeMillis());
-        this.justUnpaused = false;
+        if (this.inEndAnim) {
+            this.handleEndAnimation();
+        } else {
+            this.handleTimer(System.currentTimeMillis());
+            this.trySpawnNext(System.currentTimeMillis());
+            this.justUnpaused = false;
+        }
 
         window.background(223);
 
@@ -254,10 +337,12 @@ public class Level {
             timeTillNextSpawn = this.nextBallSpawnLastMeasuredTimeTill;
         }
 
-        window.textAlign(PApplet.LEFT, PApplet.BOTTOM);
-        window.text(String.format("%.1f", timeTillNextSpawn), 230, App.TOPBAR - 8);
+        if (!this.balls.isEmpty()) {
+            window.textAlign(PApplet.LEFT, PApplet.BOTTOM);
+            window.text(String.format("%.1f", timeTillNextSpawn), 230, App.TOPBAR - 8);
+        }
 
-        if (this.paused) {
+        if (this.paused && !this.timerEmpty()) {
             window.textAlign(PApplet.CENTER, PApplet.CENTER);
             window.textSize(30);
             window.text("***PAUSED***", App.WIDTH/2f + 70, App.TOPBAR/2f - 15);
@@ -298,6 +383,9 @@ public class Level {
             for (int y = 0; y < 18; y++) {
                 for (int x = 0; x < 18; x++) {
                     if (!collided) {
+                        if (!cells[x][y].isWall()) {
+                            continue;
+                        }
                         // sets to true if there was a collision, false otherwise
                         collided = cells[x][y].handleCollision(b, this.getNeighborsArr(x, y));
                     }
@@ -347,6 +435,7 @@ public class Level {
             if (!this.paused) {
                 b.move();
             }
+
             b.draw(window);
         }
 
@@ -358,7 +447,7 @@ public class Level {
 
     void addScore(float adjustment) {
         this.currentScore += adjustment;
-        App.addScore(this.currentScore);
+        App.addScore(adjustment);
     }
 
     /**
@@ -548,25 +637,19 @@ public class Level {
             throw new IllegalArgumentException("Illegal color code: " + color);
         }
 
-        Ball res = new Ball(color, true);
+        Ball res = new Ball(color);
         res.setInitPos(x, y);
         res.spawn();
         (this.balls).add(res);
     }
 
     void setBalls(JSONObject config) {
-        Random random = new Random();
         JSONArray ballColors = config.getJSONArray("balls");
 
         for (int i = 0; i < ballColors.size(); i++) {
             Ball newBall = new Ball(
                     App.getColorCode(ballColors.getString(i))
             );
-            int j = random.nextInt(spawnerLocs.size());
-            int[] initPos = spawnerLocs.get(j);
-
-            newBall.setInitPos(initPos[0], initPos[1]);
-
             balls.add(newBall);
         }
     }

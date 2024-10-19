@@ -11,6 +11,8 @@ public class Cell {
     private int y;
     private Ball ball;
 
+    private PImage preAnimSprite = null;
+
     public Cell(String type, int x, int y) {
         this.type = type;
         this.x = x;
@@ -18,6 +20,15 @@ public class Cell {
 
         // none squares will return null for sprite
         this.sprite = App.getSprite(type);
+    }
+
+    void setOldWall() {
+        this.sprite = preAnimSprite;
+    }
+
+    void setYellowWall() {
+        this.preAnimSprite = this.sprite;
+        this.sprite = App.getSprite("wall4");
     }
 
     /**
@@ -44,10 +55,6 @@ public class Cell {
         int LEFT = 2;
         int RIGHT = 3;
 
-        if (!this.isWall()) {
-            return false;
-        }
-
         Vec2 v = ball.getPosVec();
         float size = App.CELLSIZE;
         int[] coords = this.getPos(false);
@@ -55,7 +62,7 @@ public class Cell {
         int y = coords[1];
 
         float closestX = clamp(x, v.x, x + size);
-        float closestY = clamp(y - size, v.y, y);
+        float closestY = clamp(y, v.y, y + size);
 
         if (v.distanceTo(closestX, closestY) > Ball.radius * ball.spriteScaleFactor) {
             return false;
@@ -68,19 +75,19 @@ public class Cell {
         }
 
         //TODO: fix bug with side hit changing y velo, maybe add velo checks for direction?
-        //TODO: bug with balls hitting y walls too high or phasing though a bit of floor, maybe only on mac?
+        //TODO: fix ball spawning in and immediately going into hole
         if (
                 (v.x > x + size && !neighbors[RIGHT])
                 || (v.x < x && !neighbors[LEFT])
         ) {
-            ball.dx *= -1;
+            ball.bounceX();
         }
 
         if (
                 (v.y > y && !neighbors[BELOW])
                 || (v.y < y + size && !neighbors[ABOVE])
         ) {
-            ball.dy *= -1;
+            ball.bounceY();
         }
 
         return true;

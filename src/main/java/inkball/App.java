@@ -11,7 +11,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-import java.io.*;
 import java.util.*;
 
 public class App extends PApplet {
@@ -41,6 +40,8 @@ public class App extends PApplet {
     int currentLevelIndex = 0;
 
     static private float score = 0;
+
+    private boolean gameOver = false;
 
     public App() {
         this.configPath = "config.json";
@@ -143,8 +144,23 @@ public class App extends PApplet {
         }
 
         if (key == 'r') {
-            App.score -= this.currentLevel.currentScore;
-            this.currentLevel = new Level(levelConfigs.getJSONObject(this.currentLevelIndex));
+            if (!this.gameOver) {
+                App.score -= this.currentLevel.currentScore;
+                this.currentLevel = new Level(levelConfigs.getJSONObject(this.currentLevelIndex));
+            }
+
+            loadLevels();
+            App.score = 0;
+            this.gameOver = false;
+        }
+
+        if (key == 'k') {
+            this.currentLevel.removeBall();
+        }
+
+        if (key == 'l') {
+            this.currentLevel.timeLeft = 0;
+            this.currentLevel.inEndAnim = false;
         }
     }
 
@@ -158,6 +174,10 @@ public class App extends PApplet {
 
     @Override
     public void mousePressed(MouseEvent e) {
+        if (this.gameOver || this.currentLevel.inEndAnim) {
+            return;
+        }
+
         if (mouseButton == LEFT) {
             this.currentLevel.addLineMouse(mouseX, mouseY);
         }
@@ -165,6 +185,10 @@ public class App extends PApplet {
 	
 	@Override
     public void mouseDragged(MouseEvent e) {
+        if (this.gameOver || this.currentLevel.inEndAnim) {
+            return;
+        }
+
         if (mouseButton == LEFT) {
             this.currentLevel.addCurrentLinePoint(mouseX, mouseY);
         } else if (mouseButton == RIGHT) {
@@ -174,6 +198,10 @@ public class App extends PApplet {
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        if (this.gameOver || this.currentLevel.inEndAnim) {
+            return;
+        }
+
         this.currentLevel.removeCurrentLine();
     }
 
@@ -182,15 +210,38 @@ public class App extends PApplet {
      */
 	@Override
     public void draw() {
-        if (currentLevel.levelOver()) {
-            //TODO: game over message
-            currentLevelIndex++;
-            currentLevel = levels.get(currentLevelIndex);
+        if (currentLevel.levelOver() && !this.gameOver) {
+            if (!this.currentLevel.inEndAnim) {
+                // need to start animation
+                if (!this.currentLevel.timerEmpty()) {
+                    this.currentLevel.startLevelEndAnim();
+                }
+
+                // either level ended with no time or animation over
+                else {
+                    currentLevelIndex++;
+                    try {
+                        currentLevel = levels.get(currentLevelIndex);
+                    } catch (IndexOutOfBoundsException e) {
+                        this.gameOver = true;
+                        currentLevel.togglePause();
+                    }
+                }
+            }
         }
 
         currentLevel.draw(this);
-
         this.drawScore();
+
+        if (this.gameOver) {
+            this.drawGameOver();
+        }
+    }
+
+    void drawGameOver() {
+        this.textAlign(PApplet.CENTER, PApplet.CENTER);
+        this.textSize(30);
+        this.text("===ENDED===", App.WIDTH/2f + 70, App.TOPBAR/2f - 15);
     }
 
     void drawScore() {

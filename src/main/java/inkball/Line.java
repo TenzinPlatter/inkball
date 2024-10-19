@@ -24,9 +24,9 @@ public class Line {
         Vec2 a = null;
         Vec2 b = null;
         Vec2 ballV = ball.getVelVec();
-        Vec2 ballPTemp = ball.getPosVec();
-        Vec2 ballP = new Vec2(ballPTemp.x, ballPTemp.y);
+        Vec2 ballP = ball.getPosVec();
 
+        // requires passing radius as it is used for checking for mouse collision with lines aswell
         Vec2[] res = checkForCollision(ballP, (int) Ball.radius);
 
         if (res == null) {
@@ -73,7 +73,7 @@ public class Line {
      */
     Vec2[] checkForCollision(Vec2 point, int radius) {
         // Without this offset collision will be triggered well before/after visually hitting line
-        Vec2 actualPoint = new Vec2(point.x, point.y + radius * 2);
+        Vec2 actualPoint = new Vec2(point.x, point.y - radius);
         for (int i = 0; i < points.size() - 1; i++) {
             Vec2 u = points.get(i);
             Vec2 v = points.get(i + 1);
@@ -82,7 +82,7 @@ public class Line {
             // it will collide with the close side
             if (
                     u.distanceTo(actualPoint) + v.distanceTo(actualPoint)
-                    < u.distanceTo(v) + radius * 3
+                    < u.distanceTo(v) + radius // * 3
             ) {
                 // collided with wall section
                 return new Vec2[] {u, v};
