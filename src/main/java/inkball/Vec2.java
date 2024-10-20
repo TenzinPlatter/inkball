@@ -9,6 +9,10 @@ public class Vec2 {
         this.y =y;
     }
 
+    /**
+     *
+     * @return A copy of the vector
+     */
     Vec2 copy() {
         return new Vec2(this.x, this.y);
     }
@@ -33,13 +37,6 @@ public class Vec2 {
                 (float) ((int) this.x / App.CELLSIZE),
                 (float) ((int) (this.y - App.TOPBAR) / App.CELLHEIGHT)
         );
-    }
-
-    /**
-     * Prints the x and y coordinates of this vector
-     */
-    void print() {
-        System.out.printf("Vec: (%f %f)\n", this.x, this.y);
     }
 
     /**
@@ -81,6 +78,11 @@ public class Vec2 {
         );
     }
 
+    /**
+     *
+     * @param v Second vector
+     * @return Distance to second vector
+     */
     double distanceTo(Vec2 v) {
         return Math.sqrt(
                 Math.pow((v.x - this.x), 2)
@@ -92,10 +94,19 @@ public class Vec2 {
         return this.distanceTo(0, 0);
     }
 
+    /**
+     * Adds another vector
+     * @param v Vector to add
+     * @return Vector after being added
+     */
     Vec2 add(Vec2 v) {
         return new Vec2(this.x + v.x, this.y + v.y);
     }
 
+    /**
+     * Normalises the vector
+     * @return The normalised vector
+     */
     Vec2 getUnitVec() {
         float magnitude = (float) this.magnitude();
 
@@ -105,18 +116,21 @@ public class Vec2 {
         return new Vec2(x, y);
     }
 
+    /**
+     * Returns the dot product between this and another vector
+     * @param v Second vector
+     * @return The value of the dot product
+     */
     float dot(Vec2 v) {
         return (this.x * v.x) + (this.y * v.y);
     }
 
-    Vec2 projectionOnto(Vec2 v) {
-        float dotUV = this.dot(v);
-        float magV = (float) Math.sqrt((v.x * v.x) + (v.y * v.y));
-        float k = dotUV / magV;
-
-        return new Vec2(k * v.x, k * v.y);
-    }
-
+    /**
+     * Returns the distance between this vector and another
+     * @param x x coordinate of second vector
+     * @param y y coordinate of second vector
+     * @return Distance value
+     */
     double distanceTo(float x, float y) {
         return Math.sqrt(
                 Math.pow((x - this.x), 2)

@@ -59,10 +59,17 @@ public class Level {
         adjustScoreAmounts();
     }
 
+    /**
+     *
+     * @return If timer for level is over
+     */
     boolean timerEmpty() {
         return this.timeLeft <= 0;
     }
 
+    /**
+     * Start animation for level end
+     */
     void startLevelEndAnim() {
         this.inEndAnim = true;
 
@@ -73,14 +80,6 @@ public class Level {
                 new Vec2(0, 0),
                 new Vec2(this.cells.length - 1, this.cells[0].length - 1)
         };
-    }
-
-    void removeBall() {
-        //TODO: remove this only for testing
-
-        try {
-            this.balls.remove(this.balls.get(0));
-        } catch (IndexOutOfBoundsException ignored) {}
     }
 
     /**
@@ -186,6 +185,10 @@ public class Level {
         return this.balls.isEmpty();
     }
 
+    /**
+     * Rotates yellow cells for end of level animation
+     * Only use after calling startLevelEndAnime
+     */
     void rotateYellowCells() {
         if (!this.inEndAnim) {
             throw new RuntimeException("Cannot rotate yellow cells out of animation");
@@ -220,6 +223,10 @@ public class Level {
         }
     }
 
+    /**
+     * Handles animation for end of level
+     * Should be called on every frame
+     */
     void handleEndAnimation() {
         if (this.framesSinceLastScoreAdd < 4) {
             this.framesSinceLastScoreAdd++;
@@ -237,6 +244,10 @@ public class Level {
         }
     }
 
+    /**
+     * Draws everything associated with this level
+     * @param window Window to draw onto
+     */
     void draw(PApplet window) {
         if (this.inEndAnim) {
             this.handleEndAnimation();
@@ -254,28 +265,26 @@ public class Level {
         drawLines(window);
 
         drawTopBar(window);
-
-        // level won
-        if (this.balls.isEmpty()) {
-            return;
-        }
-
-        // level lost
-        if (this.timeLeft <= 0) {
-            return;
-        }
     }
 
+    /**
+     * Draws elements in top bar
+     * @param window Window to draw on
+     */
     void drawTopBar(PApplet window) {
         drawText(window);
         drawNextBalls(window);
     }
 
+    /**
+     * Draws window showing next five balls
+     * @param window Window to draw onto
+     */
     void drawNextBalls(PApplet window) {
         window.fill(0);
         window.strokeWeight(4);
 
-        // Rect for room for 5 balls with diameter 32 and gap of 10 between each ball, space-around
+        // Rect for room for 5 balls with diameter 24 and gap of 10 between each ball, space-around
         window.rect(10, 10, 210, 37);
 
         int count = 0;
@@ -303,6 +312,10 @@ public class Level {
         }
     }
 
+    /**
+     * Increments timer, pauses when game is paused
+     * @param time Current system time
+     */
     void handleTimer(long time) {
         if (this.justUnpaused) {
             this.timerLast += this.pausedTimeDiff;
@@ -320,6 +333,10 @@ public class Level {
         }
     }
 
+    /**
+     * Draws text for topbar
+     * @param window Window to draw onto
+     */
     void drawText(PApplet window) {
         window.fill(0);
 
@@ -349,12 +366,20 @@ public class Level {
         }
     }
 
+    /**
+     * Draws all lines associated with this level
+     * @param window Window to draw onto
+     */
     void drawLines(PApplet window) {
         for (Line line : this.lines) {
             line.draw(window);
         }
     }
 
+    /**
+     * Handles collision between lines and a given ball
+     * @param ball Ball to be checked
+     */
     void handleLinesCollision(Ball ball) {
         for (Line line : this.lines) {
             if (line.handleCollision(ball)) {
@@ -365,7 +390,7 @@ public class Level {
     }
 
     /**
-     * method to draw balls and handle all movement/sprite editing
+     * Method to draw balls and handle all movement/sprite editing
      * @param window Window to draw onto
      */
     void drawBalls(PApplet window) {
@@ -445,6 +470,11 @@ public class Level {
         }
     }
 
+    /**
+     * Adds score to the App
+     * Use this over manual adding or calling of App.addScore so level restarts can preserve initial score
+     * @param adjustment How much the score will be increased by
+     */
     void addScore(float adjustment) {
         this.currentScore += adjustment;
         App.addScore(adjustment);
@@ -498,9 +528,9 @@ public class Level {
     }
 
     /**
-     * Method for getting boolean neighbors array used in handling ball collision
-     * @param x
-     * @param y
+     * Gets boolean array of whether cells above a given cell are collidable
+     * @param x x coordinate of cell to check
+     * @param y y coordinate of cell to check
      * @return returns array of booleans encoding whether neighboring cell is a wall
      * in order -> Above, Below, Left, Right
      */
@@ -542,6 +572,10 @@ public class Level {
         return neighbors;
     }
 
+    /**
+     * Draws all cells associated with level
+     * @param window Window to draw onto
+     */
     void drawCells(PApplet window) {
         for (int y = 0; y < 18; y++) {
             for (int x = 0; x < 18; x++) {
@@ -550,6 +584,9 @@ public class Level {
         }
     }
 
+    /**
+     * Sets cells from config file
+     */
     void setCells() {
         FileReader layoutFile;
         try {
@@ -602,7 +639,7 @@ public class Level {
                 else if (c == '0' || c == '1' || c == '2' || c == '3' || c == '4') {
                     if (inBall) {
                         cells[x - 1][y] = new Cell("tile", x - 1, y);
-                        giveBallInit(c, x, y);
+                        setBallInit(c, x, y);
 
                         cells[x][y] = new Cell("tile", x, y);
                         inBall = false;
@@ -631,7 +668,13 @@ public class Level {
         try { layout.close(); } catch (IOException e) { throw new RuntimeException(); }
     }
 
-    void giveBallInit(char colorCode, int x, int y) {
+    /**
+     * Sets a ball to spawn when level starts at give position
+     * @param colorCode Color code of ball
+     * @param x x coordinate of cell ball should spawn on
+     * @param y y coordinate of cell ball should spawn on
+     */
+    void setBallInit(char colorCode, int x, int y) {
         int color = colorCode - '0';
         if (color < 0 || color > 4) {
             throw new IllegalArgumentException("Illegal color code: " + color);
@@ -643,6 +686,10 @@ public class Level {
         (this.balls).add(res);
     }
 
+    /**
+     * Sets balls to be spawned at an interval from config file
+     * @param config Config options
+     */
     void setBalls(JSONObject config) {
         JSONArray ballColors = config.getJSONArray("balls");
 
@@ -654,6 +701,9 @@ public class Level {
         }
     }
 
+    /**
+     * Applies the levels score multiplier to amount of points score by each ball
+     */
     void adjustScoreAmounts() {
         for (int i = 0; i < generalScoreIncrease.length; i++) {
             scoreIncrease[i] = generalScoreIncrease[i] * increaseModifier;
@@ -661,6 +711,11 @@ public class Level {
         }
     }
 
+    /**
+     * Sets general score increase from config file
+     * @param increase Increases for each color
+     * @param decrease Decreases for each color
+     */
     static void setScoreAmounts(JSONObject increase, JSONObject decrease) {
         generalScoreIncrease[GREY] = increase.getInt("grey");
         generalScoreIncrease[ORANGE] = increase.getInt("orange");

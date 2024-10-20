@@ -9,10 +9,14 @@ public class Cell {
     private PImage sprite;
     private int x;
     private int y;
-    private Ball ball;
-
     private PImage preAnimSprite = null;
 
+    /**
+     * Constructor for cell
+     * @param type Type of cell e.g. "wall", "none" for non collision tile
+     * @param x x coordinate of cell
+     * @param y y coordinate of cell
+     */
     public Cell(String type, int x, int y) {
         this.type = type;
         this.x = x;
@@ -22,10 +26,17 @@ public class Cell {
         this.sprite = App.getSprite(type);
     }
 
+    /**
+     * Sets a wall to its state before being set as a yellow wall in level end animation
+     */
     void setOldWall() {
         this.sprite = preAnimSprite;
     }
 
+    /**
+     * Sets a wall as a yellow wall for end level animation
+     * Use this method rather than setting manually so that wall can be put back after
+     */
     void setYellowWall() {
         this.preAnimSprite = this.sprite;
         this.sprite = App.getSprite("wall4");
@@ -33,10 +44,10 @@ public class Cell {
 
     /**
      * Clamps the value b between values a and c
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a Minimum value
+     * @param b Value to clamp
+     * @param c Maximum
+     * @return Clamped value
      */
     float clamp(float a, float b, float c) {
         return Math.max(a, Math.min(b, c));
@@ -45,7 +56,7 @@ public class Cell {
     /**
      * Handles collision for a given ball on this cell, should be called before move
      * @param ball Ball to check
-     * @param neighbors Array of bools, stating whether or not the cell has surrounding cells,
+     * @param neighbors Array of bools, stating whether the cell has surrounding cells,
      *                  in the order -> Above, Below, Left, Right
      * @return Returns true if collision has happened, false otherwise
      */
@@ -57,7 +68,7 @@ public class Cell {
 
         Vec2 v = ball.getPosVec();
         float size = App.CELLSIZE;
-        int[] coords = this.getPos(false);
+        int[] coords = this.getPos();
         int x = coords[0];
         int y = coords[1];
 
@@ -96,7 +107,8 @@ public class Cell {
     /**
      * Method to check the color of a given type of sprite
      * @param type Either hole or wall
-     * @return returns integer code corresponding to color, 0 for no color/grey
+     * @return returns integer code corresponding to color:
+     0 for no color/grey
      * 1 -> orange
      * 2 -> blue
      * 3 -> green
@@ -112,14 +124,12 @@ public class Cell {
         return 0;
     }
 
+    /**
+     *
+     * @return Whether the cell is a collisional wall
+     */
     boolean isWall() {
-        for (int i = 0; i < 5; i++) {
-            if (App.getSprite("wall" + i) == this.sprite) {
-                return true;
-            }
-        }
-
-        return false;
+        return this.type.contains("wall");
     }
 
     void setHole() {
@@ -130,24 +140,20 @@ public class Cell {
         return this.isHole;
     }
 
-    int[] getPos(boolean asCoords) {
-        if (asCoords) {
-            return new int[] {this.x, this.y};
-        }
-
+    int[] getPos() {
         return new int[] {this.x * App.CELLSIZE, (this.y * App.CELLSIZE) + 64};
     }
 
-    String getType() {
-        return this.type;
-    }
-
+    /**
+     * Draws the cell
+     * @param window Window to draw the cell to
+     */
     void draw(PApplet window) {
         if (this.sprite == null) {
             return;
         }
 
-        int[] pos = this.getPos(false);
+        int[] pos = this.getPos();
         int width = (this.isHole()) ? App.CELLSIZE * 2 : App.CELLSIZE;
         int height = (this.isHole()) ? App.CELLSIZE * 2 : App.CELLSIZE;
 

@@ -47,6 +47,12 @@ public class App extends PApplet {
         this.configPath = "config.json";
     }
 
+    /**
+     * Returns the sprite associated with the name passed in. E.G. :
+     * wall4 -> resources/inkball/wall4.png
+     * @param name File name of the image without extension
+     * @return PImage object of sprite
+     */
     static PImage getSprite(String name) {
         return sprites.get(name);
     }
@@ -71,6 +77,9 @@ public class App extends PApplet {
         loadLevels();
     }
 
+    /**
+     * Loads all levels from config file into this.levels
+     */
     void loadLevels() {
         this.levelConfigs = config.getJSONArray("levels");
         JSONObject ballScoreIncrease = config.getJSONObject("score_increase_from_hole_capture");
@@ -86,6 +95,9 @@ public class App extends PApplet {
         currentLevel = levels.get(currentLevelIndex);
     }
 
+    /**
+     * Load all sprites for inkball array into hashmap for getting through getSprite
+     */
     void loadSprites() {
         sprites.put("tile", loadImageFromPath("tile.png"));
         sprites.put("entrypoint", loadImageFromPath("entrypoint.png"));
@@ -102,6 +114,11 @@ public class App extends PApplet {
 
     }
 
+    /**
+     * Loads an image using its filename
+     * @param filename Filename of resource **including extension**
+     * @return A PImage object of the file
+     */
     PImage loadImageFromPath(String filename) {
         try {
             return loadImage(
@@ -113,6 +130,12 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Returns the associated color code as seen in files
+     * @param color Color to get code for
+     * @return The color code
+     * @throws RuntimeException When color passed in is not a valid color
+     */
     static int getColorCode(String color) {
         switch (color) {
             case "grey":
@@ -153,15 +176,6 @@ public class App extends PApplet {
             App.score = 0;
             this.gameOver = false;
         }
-
-        if (key == 'k') {
-            this.currentLevel.removeBall();
-        }
-
-        if (key == 'l') {
-            this.currentLevel.timeLeft = 0;
-            this.currentLevel.inEndAnim = false;
-        }
     }
 
     /**
@@ -172,6 +186,10 @@ public class App extends PApplet {
         
     }
 
+    /**
+     * Mouse button falls
+     * @param e Event context
+     */
     @Override
     public void mousePressed(MouseEvent e) {
         if (this.gameOver || this.currentLevel.inEndAnim) {
@@ -182,7 +200,11 @@ public class App extends PApplet {
             this.currentLevel.addLineMouse(mouseX, mouseY);
         }
     }
-	
+
+    /**
+     * Mouse move while button has fallen
+     * @param e Event context
+     */
 	@Override
     public void mouseDragged(MouseEvent e) {
         if (this.gameOver || this.currentLevel.inEndAnim) {
@@ -196,6 +218,10 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Mouse button rises
+     * @param e Event Context
+     */
     @Override
     public void mouseReleased(MouseEvent e) {
         if (this.gameOver || this.currentLevel.inEndAnim) {
@@ -238,12 +264,18 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * Draws ended text for when game is over
+     */
     void drawGameOver() {
         this.textAlign(PApplet.CENTER, PApplet.CENTER);
         this.textSize(30);
         this.text("===ENDED===", App.WIDTH/2f + 70, App.TOPBAR/2f - 15);
     }
 
+    /**
+     * Draws the current score to the window
+     */
     void drawScore() {
         fill(0);
         textAlign(RIGHT, BOTTOM);
