@@ -162,20 +162,26 @@ public class App extends PApplet {
      */
 	@Override
     public void keyPressed(KeyEvent event){
-        if (key == ' ') {
-            this.currentLevel.togglePause();
-        }
-
         if (key == 'r') {
-            if (!this.gameOver) {
+            if (this.gameOver) {
+                loadLevels();
+                App.score = 0;
+                this.gameOver = false;
+            } else {
                 App.score -= this.currentLevel.currentScore;
                 this.currentLevel = new Level(levelConfigs.getJSONObject(this.currentLevelIndex));
             }
 
-            loadLevels();
-            App.score = 0;
-            this.gameOver = false;
         }
+
+        if (this.currentLevel.timerEmpty()) {
+            return;
+        }
+
+        if (key == ' ') {
+            this.currentLevel.togglePause();
+        }
+
     }
 
     /**
@@ -192,7 +198,7 @@ public class App extends PApplet {
      */
     @Override
     public void mousePressed(MouseEvent e) {
-        if (this.gameOver || this.currentLevel.inEndAnim) {
+        if (this.gameOver || this.currentLevel.inEndAnim || this.currentLevel.timerEmpty()) {
             return;
         }
 
@@ -207,7 +213,7 @@ public class App extends PApplet {
      */
 	@Override
     public void mouseDragged(MouseEvent e) {
-        if (this.gameOver || this.currentLevel.inEndAnim) {
+        if (this.gameOver || this.currentLevel.inEndAnim || this.currentLevel.timerEmpty()) {
             return;
         }
 
@@ -224,7 +230,7 @@ public class App extends PApplet {
      */
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (this.gameOver || this.currentLevel.inEndAnim) {
+        if (this.gameOver || this.currentLevel.inEndAnim || this.currentLevel.timerEmpty()) {
             return;
         }
 
@@ -254,6 +260,10 @@ public class App extends PApplet {
                     }
                 }
             }
+        }
+
+        if (this.currentLevel.levelLost && !this.currentLevel.paused) {
+            this.currentLevel.togglePause();
         }
 
         currentLevel.draw(this);

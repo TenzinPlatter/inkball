@@ -24,7 +24,7 @@ public class Level {
 
     private float nextBallSpawnLastMeasuredTimeTill = 0;
 
-    private boolean paused = false;
+    boolean paused = false;
     private long pausedTimeDiff = 0;
     private boolean justUnpaused = false; private ArrayList<Ball> balls = new ArrayList<>();
     private ArrayList<int[]> spawnerLocs = new ArrayList<>();
@@ -46,6 +46,8 @@ public class Level {
     boolean inEndAnim = false;
     private int framesSinceLastScoreAdd = 0;
     private Vec2[] currentYellowCells = new Vec2[2];
+
+    boolean levelLost = false;
 
     public Level(JSONObject config) {
         layoutFilePath = config.getString("layout");
@@ -244,6 +246,12 @@ public class Level {
         }
     }
 
+    void drawTimeUp(PApplet window) {
+        window.textAlign(PApplet.CENTER, PApplet.CENTER);
+        window.textSize(30);
+        window.text("===TIME'S UP===", App.WIDTH/2f + 70, App.TOPBAR/2f - 15);
+    }
+
     /**
      * Draws everything associated with this level
      * @param window Window to draw onto
@@ -251,7 +259,9 @@ public class Level {
     void draw(PApplet window) {
         if (this.inEndAnim) {
             this.handleEndAnimation();
-        } else {
+        }
+
+        else {
             this.handleTimer(System.currentTimeMillis());
             this.trySpawnNext(System.currentTimeMillis());
             this.justUnpaused = false;
@@ -265,6 +275,11 @@ public class Level {
         drawLines(window);
 
         drawTopBar(window);
+
+        if (this.timerEmpty()) {
+            this.drawTimeUp(window);
+            this.levelLost = true;
+        }
     }
 
     /**
