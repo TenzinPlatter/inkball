@@ -5,19 +5,23 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 
 public class Line {
-  private ArrayList<Vec2> points = new ArrayList<>();
+  private final ArrayList<Vec2> points = new ArrayList<>();
 
   public Line(Vec2 start) {
     this.points.add(start);
   }
 
+  /**
+   * Adds a point to this line
+   * @param point Coordinates of point to be added
+   */
   void addPoint(Vec2 point) {
     this.points.add(point);
   }
 
   /**
    * Checks for collision between passed in ball and line
-   * @param ball
+   * @param ball Ball to be checked
    * @return Returns false for no collision, true for collision
    */
   boolean handleCollision(Ball ball) {
@@ -72,17 +76,13 @@ public class Line {
    * @return True if collision, else false
    */
   Vec2[] checkForCollision(Vec2 point, int radius) {
-    // Without this offset collision will be triggered well before/after visually hitting line
-    Vec2 actualPoint = new Vec2(point.x, point.y - radius);
     for (int i = 0; i < points.size() - 1; i++) {
       Vec2 u = points.get(i);
       Vec2 v = points.get(i + 1);
 
-      // radius * 3 stops ball from going through line until it reaches the far edge, and
-      // it will collide with the close side
       if (
-              u.distanceTo(actualPoint) + v.distanceTo(actualPoint)
-                      < u.distanceTo(v) + radius // * 3
+              u.distanceTo(point) + v.distanceTo(point)
+              < u.distanceTo(v) + radius
       ) {
         // collided with wall section
         return new Vec2[] {u, v};

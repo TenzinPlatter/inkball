@@ -90,12 +90,16 @@ public class Vec2 {
     );
   }
 
+  /**
+   * Find the magnitude of this vector
+   * @return The value of the magnitude
+   */
   double magnitude() {
     return this.distanceTo(0, 0);
   }
 
   /**
-   * Adds another vector
+   * Adds another vector to this
    * @param v Vector to add
    * @return Vector after being added
    */

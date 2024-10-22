@@ -24,22 +24,37 @@ public class Ball {
     setInitVelocity();
   }
 
+	/**
+	 * Get the sprite of this ball
+	 */
   PImage getSprite() {
     return this.sprite;
   }
 
+	/**
+	 * Get a copy of the balls current position vector 
+	 */
   Vec2 getPosVec() {
     return this.pos.copy();
   }
 
+	/**
+	 * Set the balls spawned value to true
+	 */
   void spawn() {
     this.hasSpawned = true;
   }
 
+	/**
+	 * @return If this ball has been spawned or not
+	 */
   boolean hasSpawned() {
     return this.hasSpawned;
   }
 
+	/**
+	 * Set the balls velocity
+	 */
   void setVel(Vec2 newVel) {
     this.dx = newVel.x;
     this.dy = newVel.y;
@@ -60,8 +75,11 @@ public class Ball {
   }
 
 
+	/**
+	 * Get a copy of the balls current velocity vector 
+	 */
   Vec2 getVelVec() {
-    return new Vec2(this.dx, this.dy).copy();
+    return new Vec2(this.dx, this.dy);
   }
 
   /**
