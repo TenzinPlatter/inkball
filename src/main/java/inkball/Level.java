@@ -17,6 +17,7 @@ public class Level {
   private final double increaseModifier;
   private final double decreaseModifier;
 
+	// used to keep timer for next ball spawn static when paused
   private float nextBallSpawnLastMeasuredTimeTill = 0;
 
   boolean paused = false;
@@ -109,7 +110,7 @@ public class Level {
   }
 
   /**
-   * Method to add a point to the line currently being added
+   * Method to add a point to the line currently being drawn
    * @param x
    * @param y
    */
@@ -144,7 +145,7 @@ public class Level {
   }
 
   /**
-   * Trys to spawn next ball, fails if timer has not passed or no next ball to be spawned
+   * Try's to spawn next ball, fails if timer has not passed or no next ball to be spawned
    * @param time
    * @return
    */

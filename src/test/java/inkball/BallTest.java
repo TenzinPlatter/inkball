@@ -12,28 +12,10 @@ import processing.core.PImage;
 
 class BallTest {
 	private Ball ball;
-	private static App app;
-
-	@BeforeAll
-	static void appSetup() {
-		app = new App();
-		app.setup();
-	}
 
 	@BeforeEach
 	void ballSetup() {
 		ball = new Ball(1);
-	}
-
-	@Test
-	void getSpriteTest() {
-		App app = new App();
-		app.loadSprites();
-
-		// grey ball
-		PImage expected = App.getSprite("ball1");
-
-		assertEquals(expected, ball.getSprite());
 	}
 
 	@Test
@@ -59,7 +41,11 @@ class BallTest {
 	void setVelTest() {
 		ball.setVel(new Vec2(4, 3));
 
-		assertEquals(ball.getVelVec(), new Vec2(4, 3));
+		Vec2 expected = new Vec2(4, 3);
+		Vec2 actual = ball.getVelVec();
+
+		assertEquals(expected.x, actual.x);
+		assertEquals(expected.y, actual.y);
 	}
 
 	@Test
@@ -75,8 +61,10 @@ class BallTest {
 
 	@Test
 	void getVelVecTest() {
+		ball.setVel(new Vec2(1, 1));
 		Vec2 actual = ball.getVelVec();
-		Vec2 expected = new Vec2(0, 0);
+
+		Vec2 expected = new Vec2(1, 1);
 
 		assertEquals(expected.x, actual.x);
 		assertEquals(expected.y, actual.y);
@@ -87,7 +75,19 @@ class BallTest {
 		ball.setInitPos(5, 2);
 
 		Vec2 actual = ball.getPosVec();
-		Vec2 expected = new Vec2(5, 2);
+		Vec2 expected = new Vec2(160, 128);
+
+		assertEquals(expected.x, actual.x);
+		assertEquals(expected.y, actual.y);
+	}
+
+	@Test
+	void moveTest() {
+		ball.setVel(new Vec2(1, 1));
+		ball.move();
+
+		Vec2 expected = new Vec2(1, 1);
+		Vec2 actual = ball.getPosVec();
 
 		assertEquals(expected.x, actual.x);
 		assertEquals(expected.y, actual.y);

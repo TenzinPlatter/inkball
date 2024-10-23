@@ -10,7 +10,6 @@ public class Vec2 {
   }
 
   /**
-   *
    * @return A copy of the vector
    */
   Vec2 copy() {

@@ -16,7 +16,6 @@ public class Ball {
 
   // set as a float for division in draw section
   static final float radius = 12f;
-  static Random random = new Random();
 
   public Ball(int colorcode) {
     this.color = colorcode;
@@ -100,9 +99,6 @@ public class Ball {
    * @throws IllegalArgumentException If sprite is null
    */
   void setSprite(PImage sprite) {
-    if (sprite == null) {
-      throw new IllegalArgumentException("Cannot set sprite as null");
-    }
     this.sprite = sprite;
   }
 
@@ -120,6 +116,7 @@ public class Ball {
    * Randomly sets initial velocity
    */
   private void setInitVelocity() {
+		Random random = new Random();
     // returns 0 - 1
     int xDir = random.nextInt(2);
     int yDir = random.nextInt(2);

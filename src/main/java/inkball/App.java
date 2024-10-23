@@ -14,18 +14,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class App extends PApplet {
-
   public static final int CELLSIZE = 32; //8;
   public static final int CELLHEIGHT = 32;
 
-  public static final int CELLAVG = 32;
   public static final int TOPBAR = 64;
   public static int WIDTH = 576; //CELLSIZE*BOARD_WIDTH;
   public static int HEIGHT = 640; //BOARD_HEIGHT*CELLSIZE+TOPBAR;
-  public static final int BOARD_WIDTH = WIDTH/CELLSIZE;
-  public static final int BOARD_HEIGHT = 20;
-
-  public static final int INITIAL_PARACHUTES = 1;
 
   public static final int FPS = 60;
 
@@ -183,14 +177,6 @@ public class App extends PApplet {
     if (key == ' ') {
       this.currentLevel.togglePause();
     }
-
-  }
-
-  /**
-   * Receive key released signal from the keyboard.
-   */
-  @Override
-  public void keyReleased(){
 
   }
 

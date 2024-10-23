@@ -10,10 +10,11 @@ output:
 # Design Choices
 In my program I decided not to use any inheritance or interfaces, as I decided that there were no objects that shared enough properties/functionality to justify it. I considered using it for the walls/spawners/holes, and having them
 inherit from a 'Cell' class, but I opted to use just a Cell class for all of them, with a 'type' attribute to differentiate them. I chose this because there were little benefits to splitting these classes into separate classes. While
-they do share many attributes and methods, I decided they didn't differ enough to justify the clutter of their seperate classes, as the only differing functionality was that walls collided with balls and holes captured them. Another
+they do share many attributes and methods, I decided they didn't differ enough to justify the clutter of their separate classes, as the only differing functionality was that walls collided with balls and holes captured them. Another
 reason was that I planned to implement the cracking bricks extension task, which requires the type of cell to be changed from a solid, collidable wall to none when it is broken. With my design structure this can be done from within
 the object itself, whereas if each type of cell was split into its own class the responsibility of this task would have had to been delegated up to the Level object which contained the cell. Other than Cell's there were no real
 considerations to be made surrounding an implementation that made use of object oriented features past classes, as the app, levels and balls were all completely separate.
+I also chose to use 60FPS, rather than the default specified 30, meaning my balls velocities would be (&plusmin;1, &plusmin;1), rather than (&plusmin;2, &plusmin;2)
 
 # Implementation of Extension Feature
 I chose to implement the breaking bricks feature. This required all walls to visually 'crack' as they were hit, and completely break after being hit three times. Furthermore, colored bricks could only be broken by a ball of the same
