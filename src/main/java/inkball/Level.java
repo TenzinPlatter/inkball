@@ -26,9 +26,9 @@ public class Level {
   private final ArrayList<Ball> balls = new ArrayList<>();
   private final ArrayList<int[]> spawnerLocs = new ArrayList<>();
   private final ArrayList<Vec2> holeLocs = new ArrayList<>();
-  private final ArrayList<Line> lines = new ArrayList<>();
+  final ArrayList<Line> lines = new ArrayList<>();
 
-  private Cell[][] cells = new Cell[18][18];
+  Cell[][] cells = new Cell[18][18];
 
   public float currentScore = 0;
 
@@ -203,6 +203,7 @@ public class Level {
           v.x--;
         }
       }
+
       if (v.x == 0) {
         if (v.y > 0) {
           v.y--;
@@ -210,6 +211,7 @@ public class Level {
           v.x++;
         }
       }
+
       // corners will be caught earlier by x conditions
       if (v.y == 17) {
         v.x--;

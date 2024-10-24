@@ -8,14 +8,31 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import processing.core.PApplet;
 import processing.core.PImage;
 
 class BallTest {
 	private Ball ball;
+	private static App app;
+
+	@BeforeAll
+  static void appSetup() {
+		app = new App();
+		PApplet.runSketch(new String[]{"inkball"}, app);
+		app.setup();
+	}
 
 	@BeforeEach
 	void ballSetup() {
 		ball = new Ball(1);
+	}
+
+	@Test
+	void getSpriteTest() {
+		PImage actual = ball.getSprite();
+		PImage expected = App.getSprite("ball1");
+
+		assertEquals(expected, actual);
 	}
 
 	@Test

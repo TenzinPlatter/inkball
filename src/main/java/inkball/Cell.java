@@ -4,9 +4,9 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 public class Cell {
+  PImage sprite;
   private boolean isHole = false;
   private String type;
-  private PImage sprite;
   private int x;
   private int y;
   private PImage preAnimSprite = null;

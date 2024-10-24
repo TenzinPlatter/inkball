@@ -5,7 +5,7 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 
 public class Line {
-  private final ArrayList<Vec2> points = new ArrayList<>();
+  final ArrayList<Vec2> points = new ArrayList<>();
 
   public Line(Vec2 start) {
     this.points.add(start);
@@ -25,8 +25,8 @@ public class Line {
    * @return Returns false for no collision, true for collision
    */
   boolean handleCollision(Ball ball) {
-    Vec2 a = null;
-    Vec2 b = null;
+    Vec2 a;
+    Vec2 b;
     Vec2 ballV = ball.getVelVec();
     Vec2 ballP = ball.getPosVec();
 

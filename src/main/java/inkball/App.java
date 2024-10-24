@@ -72,6 +72,22 @@ public class App extends PApplet {
   }
 
   /**
+   * Get the current score for the game
+   * @return Value of the score
+   */
+  static float getScore() {
+    return App.score;
+  }
+
+  /**
+   * Set the score for the game
+   * @param score Value to set the score to
+   */
+  static void setScore(float score) {
+    App.score = score;
+  }
+
+  /**
    * Loads all levels from config file into this.levels
    */
   void loadLevels() {
@@ -121,7 +137,7 @@ public class App extends PApplet {
               URLDecoder.decode(this.getClass().getResource(filename).getPath(),
                       StandardCharsets.UTF_8.name())
       );
-    } catch (UnsupportedEncodingException e) {
+    } catch (UnsupportedEncodingException | NullPointerException e) {
       throw new RuntimeException(e);
     }
   }
